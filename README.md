@@ -1,6 +1,6 @@
 # Mystic Brews: Potion-Making Simulation Game
 
-![Mystic Brews](https://sdmntpreastus2.oaiusercontent.com/files/00000000-7b70-51f6-8198-fe96fe44a6a6/raw?se=2025-04-03T17%3A24%3A54Z&sp=r&sv=2024-08-04&sr=b&scid=a55f1eb8-118e-5d9c-873d-e705fc13bbec&skoid=3f3a9132-9530-48ef-96b7-fee5a811733f&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-04-03T04%3A59%3A53Z&ske=2025-04-04T04%3A59%3A53Z&sks=b&skv=2024-08-04&sig=lXnrQbggol0P7zdQZ2Lmqj1d%2B1F6JthyKC%2BNxpbBQmY%3D)
+![Mystic Brews](https://drive.google.com/file/d/1b_jOFtw8Pg0taZBRdK-ydfQn9AmTKrZL/view?usp=sharing)
 
 ## Overview
 
