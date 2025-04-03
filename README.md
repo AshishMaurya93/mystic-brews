@@ -1,6 +1,6 @@
 # Mystic Brews: Potion-Making Simulation Game
 
-![Mystic Brews](https://drive.google.com/file/d/1b_jOFtw8Pg0taZBRdK-ydfQn9AmTKrZL/view?usp=sharing)
+![Mystic Brews](public\Mystic brew icon.png)
 
 ## Overview
 
