@@ -6,9 +6,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import type { Inventory } from "@/lib/types"
-import { initialIngredients, initialTools } from "@/lib/game-data"
+import { initialIngredients, initialTools, potionRecipes } from "@/lib/game-data"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import { useMobile } from "@/hooks/use-mobile"
 
 interface ShopProps {
   gold: number
@@ -25,14 +27,47 @@ export default function Shop({ gold, updateGold, inventory, addToInventory, mark
   const [sellQuantity, setSellQuantity] = useState(1)
   const [activeTab, setActiveTab] = useState("buy")
   const [activeSubTab, setActiveSubTab] = useState("ingredients")
+  const [dialogOpen, setDialogOpen] = useState(false)
   const tabsListRef = useRef<HTMLDivElement>(null)
   const subTabsListRef = useRef<HTMLDivElement>(null)
+  const isMobile = useMobile()
 
-  // Shop stock changes every 3 days
-  const shopStock = {
-    ingredients: initialIngredients.filter((_, index) => (index + daysPassed) % 3 !== 0),
-    tools: initialTools.filter((_, index) => (index + daysPassed) % 4 !== 0),
+  // Get all required ingredients from recipes
+  const getAllRequiredIngredients = () => {
+    const requiredIngredientIds = new Set<string>()
+    potionRecipes.forEach((recipe) => {
+      recipe.ingredients.forEach((ingredient) => {
+        requiredIngredientIds.add(ingredient.id)
+      })
+    })
+    return requiredIngredientIds
   }
+
+  // Ensure shop always has all required ingredients
+  const getShopStock = () => {
+    const requiredIngredientIds = getAllRequiredIngredients()
+
+    // Filter ingredients to ensure all required ones are available
+    const ingredientsStock = initialIngredients.filter((ingredient) => {
+      // Always include required ingredients
+      if (requiredIngredientIds.has(ingredient.id)) {
+        return true
+      }
+      // For non-required ingredients, use the original rotation logic
+      return (ingredient.id.charCodeAt(0) + daysPassed) % 3 !== 0
+    })
+
+    // Filter tools with original rotation logic
+    const toolsStock = initialTools.filter((_, index) => (index + daysPassed) % 4 !== 0)
+
+    return {
+      ingredients: ingredientsStock,
+      tools: toolsStock,
+    }
+  }
+
+  // Shop stock with all required ingredients
+  const shopStock = getShopStock()
 
   const getMarketValue = (item: any, isBuying = true) => {
     // Apply markup for buying, discount for selling
@@ -65,6 +100,10 @@ export default function Shop({ gold, updateGold, inventory, addToInventory, mark
 
     // Reset quantity
     setBuyQuantity(1)
+
+    if (isMobile) {
+      setDialogOpen(false)
+    }
   }
 
   const sellItem = () => {
@@ -105,6 +144,10 @@ export default function Shop({ gold, updateGold, inventory, addToInventory, mark
     if (!remainingItem) {
       setSelectedItem(null)
     }
+
+    if (isMobile) {
+      setDialogOpen(false)
+    }
   }
 
   // Scroll tabs left
@@ -144,6 +187,16 @@ export default function Shop({ gold, updateGold, inventory, addToInventory, mark
         left: 100,
         behavior: "smooth",
       })
+    }
+  }
+
+  const handleItemClick = (item: any) => {
+    setSelectedItem(item)
+    setBuyQuantity(1)
+    setSellQuantity(1)
+
+    if (isMobile) {
+      setDialogOpen(true)
     }
   }
 
@@ -226,10 +279,7 @@ export default function Shop({ gold, updateGold, inventory, addToInventory, mark
                           <div
                             key={item.id}
                             className={`p-2 rounded-md cursor-pointer flex justify-between items-center ${selectedItem?.id === item.id ? "bg-purple-700" : "hover:bg-purple-800/50"}`}
-                            onClick={() => {
-                              setSelectedItem(item)
-                              setBuyQuantity(1)
-                            }}
+                            onClick={() => handleItemClick(item)}
                           >
                             <span>{item.name}</span>
                             <Badge variant="outline">{getMarketValue(item)} gold</Badge>
@@ -252,10 +302,7 @@ export default function Shop({ gold, updateGold, inventory, addToInventory, mark
                           <div
                             key={item.id}
                             className={`p-2 rounded-md cursor-pointer flex justify-between items-center ${selectedItem?.id === item.id ? "bg-purple-700" : "hover:bg-purple-800/50"}`}
-                            onClick={() => {
-                              setSelectedItem(item)
-                              setBuyQuantity(1)
-                            }}
+                            onClick={() => handleItemClick(item)}
                           >
                             <span>{item.name}</span>
                             <Badge variant="outline">{getMarketValue(item)} gold</Badge>
@@ -269,7 +316,7 @@ export default function Shop({ gold, updateGold, inventory, addToInventory, mark
             </div>
 
             <div className="md:col-span-2">
-              {selectedItem ? (
+              {!isMobile && selectedItem ? (
                 <Card>
                   <CardHeader>
                     <CardTitle>{selectedItem.name}</CardTitle>
@@ -316,11 +363,11 @@ export default function Shop({ gold, updateGold, inventory, addToInventory, mark
                     </div>
                   </CardContent>
                 </Card>
-              ) : (
+              ) : !isMobile ? (
                 <div className="h-full flex items-center justify-center">
                   <p className="text-purple-400">Select an item to purchase</p>
                 </div>
-              )}
+              ) : null}
             </div>
           </div>
         </TabsContent>
@@ -373,10 +420,7 @@ export default function Shop({ gold, updateGold, inventory, addToInventory, mark
                             <div
                               key={item.id}
                               className={`p-2 rounded-md cursor-pointer flex justify-between items-center ${selectedItem?.id === item.id && activeTab === "sell" ? "bg-purple-700" : "hover:bg-purple-800/50"}`}
-                              onClick={() => {
-                                setSelectedItem(item)
-                                setSellQuantity(1)
-                              }}
+                              onClick={() => handleItemClick(item)}
                             >
                               <div className="flex justify-between w-full">
                                 <span>{item.name}</span>
@@ -408,10 +452,7 @@ export default function Shop({ gold, updateGold, inventory, addToInventory, mark
                             <div
                               key={item.id}
                               className={`p-2 rounded-md cursor-pointer flex justify-between items-center ${selectedItem?.id === item.id && activeTab === "sell" ? "bg-purple-700" : "hover:bg-purple-800/50"}`}
-                              onClick={() => {
-                                setSelectedItem(item)
-                                setSellQuantity(1)
-                              }}
+                              onClick={() => handleItemClick(item)}
                             >
                               <div className="flex justify-between w-full">
                                 <span>{item.name}</span>
@@ -443,10 +484,7 @@ export default function Shop({ gold, updateGold, inventory, addToInventory, mark
                             <div
                               key={item.id}
                               className={`p-2 rounded-md cursor-pointer flex justify-between items-center ${selectedItem?.id === item.id && activeTab === "sell" ? "bg-purple-700" : "hover:bg-purple-800/50"}`}
-                              onClick={() => {
-                                setSelectedItem(item)
-                                setSellQuantity(1)
-                              }}
+                              onClick={() => handleItemClick(item)}
                             >
                               <div className="flex justify-between w-full">
                                 <span>{item.name}</span>
@@ -468,7 +506,7 @@ export default function Shop({ gold, updateGold, inventory, addToInventory, mark
             </div>
 
             <div className="md:col-span-2">
-              {selectedItem ? (
+              {!isMobile && selectedItem ? (
                 <Card>
                   <CardHeader>
                     <CardTitle>{selectedItem.name}</CardTitle>
@@ -522,16 +560,91 @@ export default function Shop({ gold, updateGold, inventory, addToInventory, mark
                     </div>
                   </CardContent>
                 </Card>
-              ) : (
+              ) : !isMobile ? (
                 <div className="h-full flex items-center justify-center">
                   <p className="text-purple-400">Select an item to sell</p>
                 </div>
-              )}
+              ) : null}
             </div>
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Mobile Dialog for Item Details */}
+      {isMobile && (
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogContent className="bg-purple-900 text-white border-purple-700 max-w-[90vw] sm:max-w-lg">
+            {selectedItem && (
+              <>
+                <DialogHeader>
+                  <DialogTitle>{selectedItem.name}</DialogTitle>
+                  <DialogDescription className="text-purple-300">{selectedItem.description}</DialogDescription>
+                </DialogHeader>
+
+                <div className="space-y-4">
+                  <p className="text-sm text-purple-200">
+                    {"effect" in selectedItem
+                      ? selectedItem.effect
+                      : "growthTime" in selectedItem
+                        ? `Growth time: ${selectedItem.growthTime} days - ${selectedItem.properties}`
+                        : selectedItem.function}
+                  </p>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-purple-800/30 p-3 rounded-md">
+                      <h3 className="font-semibold text-sm mb-1">{activeTab === "buy" ? "Price" : "Sell Price"}</h3>
+                      <p className="text-sm">{getMarketValue(selectedItem, activeTab === "buy")} gold each</p>
+                    </div>
+
+                    <div className="bg-purple-800/30 p-3 rounded-md">
+                      <h3 className="font-semibold text-sm mb-1">
+                        {activeTab === "buy" ? "Your Gold" : "Your Quantity"}
+                      </h3>
+                      <p className="text-sm">
+                        {activeTab === "buy" ? `${gold} gold` : `${selectedItem.quantity} available`}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <div className="w-24">
+                      <Input
+                        type="number"
+                        min="1"
+                        max={activeTab === "sell" ? selectedItem.quantity : undefined}
+                        value={activeTab === "buy" ? buyQuantity : sellQuantity}
+                        onChange={(e) => {
+                          const value = Math.max(1, Number.parseInt(e.target.value) || 1)
+                          if (activeTab === "buy") {
+                            setBuyQuantity(value)
+                          } else {
+                            setSellQuantity(Math.min(selectedItem.quantity, value))
+                          }
+                        }}
+                        className="bg-purple-800 text-white border-purple-600"
+                      />
+                    </div>
+                    {activeTab === "buy" ? (
+                      <Button
+                        onClick={buyItem}
+                        disabled={gold < getMarketValue(selectedItem) * buyQuantity}
+                        className="flex-1"
+                      >
+                        Buy for {getMarketValue(selectedItem) * buyQuantity} gold
+                      </Button>
+                    ) : (
+                      <Button onClick={sellItem} disabled={sellQuantity > selectedItem.quantity} className="flex-1">
+                        Sell for {getMarketValue(selectedItem, false) * sellQuantity} gold
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   )
 }
-
+// Note: The code above is a React component for a shop interface in a potion-making game. It allows players to buy and sell ingredients, tools, and potions, with features like dynamic pricing based on market demand and a responsive design for mobile users.

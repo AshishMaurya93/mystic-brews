@@ -109,6 +109,114 @@ export const initialIngredients: Ingredient[] = [
     basePrice: 9,
     quantity: 0,
   },
+  {
+    id: "flower_chamomile",
+    name: "Chamomile Flowers",
+    description: "Daisy-like flowers with a sweet, apple-like scent.",
+    properties: "Soothing, calming, and sleep-promoting.",
+    growthTime: 3,
+    basePrice: 7,
+    quantity: 0,
+  },
+  {
+    id: "herb_basil",
+    name: "Holy Basil",
+    description: "Sacred herb with a spicy, peppery flavor.",
+    properties: "Protective, purifying, and spiritually uplifting.",
+    growthTime: 2,
+    basePrice: 6,
+    quantity: 0,
+  },
+  {
+    id: "crystal_jade",
+    name: "Green Jade",
+    description: "Smooth, green stone with a cool touch.",
+    properties: "Harmony-bringing, balance-restoring, and prosperity-attracting.",
+    growthTime: 9,
+    basePrice: 22,
+    quantity: 0,
+  },
+  {
+    id: "root_mandrake",
+    name: "Mandrake Root",
+    description: "Human-shaped root with mystical properties.",
+    properties: "Protection, fertility, and magical amplification.",
+    growthTime: 10,
+    basePrice: 30,
+    quantity: 0,
+  },
+  {
+    id: "mushroom_morel",
+    name: "Morel Mushroom",
+    description: "Honeycomb-textured mushroom with earthy flavor.",
+    properties: "Grounding, cleansing, and vision-enhancing.",
+    growthTime: 7,
+    basePrice: 18,
+    quantity: 0,
+  },
+  {
+    id: "berry_elderberry",
+    name: "Elderberries",
+    description: "Small, dark purple berries with potent properties.",
+    properties: "Protection, healing, and spiritual awakening.",
+    growthTime: 5,
+    basePrice: 12,
+    quantity: 0,
+  },
+  {
+    id: "crystal_moonstone",
+    name: "Moonstone",
+    description: "Pearly white stone that seems to glow in moonlight.",
+    properties: "Intuition-enhancing, feminine-energy-balancing, and dream-promoting.",
+    growthTime: 8,
+    basePrice: 28,
+    quantity: 0,
+  },
+  {
+    id: "herb_valerian",
+    name: "Valerian Root",
+    description: "Earthy-smelling root with powerful calming effects.",
+    properties: "Sleep-inducing, anxiety-reducing, and peace-bringing.",
+    growthTime: 6,
+    basePrice: 14,
+    quantity: 0,
+  },
+  {
+    id: "flower_lotus",
+    name: "Lotus Flower",
+    description: "Sacred flower that blooms in muddy waters.",
+    properties: "Spiritual-awakening, purity-symbolizing, and enlightenment-bringing.",
+    growthTime: 7,
+    basePrice: 20,
+    quantity: 0,
+  },
+  {
+    id: "mushroom_amanita",
+    name: "Amanita Mushroom",
+    description: "Red-capped mushroom with white spots, highly magical.",
+    properties: "Vision-inducing, reality-altering, and consciousness-expanding.",
+    growthTime: 9,
+    basePrice: 35,
+    quantity: 0,
+  },
+  {
+    id: "crystal_obsidian",
+    name: "Obsidian",
+    description: "Black volcanic glass with protective properties.",
+    properties: "Negativity-shielding, truth-revealing, and grounding.",
+    growthTime: 10,
+    basePrice: 32,
+    quantity: 0,
+  },
+  {
+    id: "herb_nettle",
+    name: "Stinging Nettle",
+    description: "Prickly herb with hidden healing properties.",
+    properties: "Purifying, strengthening, and protection-offering.",
+    growthTime: 3,
+    basePrice: 9,
+    quantity: 0,
+  },
 ]
 
 export const initialPotions: Potion[] = [
@@ -176,6 +284,70 @@ export const initialPotions: Potion[] = [
     basePrice: 55,
     quantity: 0,
   },
+  {
+    id: "potion_water_breathing",
+    name: "Water Breathing",
+    description: "A blue-green potion with bubbles that never pop.",
+    effect: "Allows breathing underwater for up to 1 hour.",
+    basePrice: 65,
+    quantity: 0,
+  },
+  {
+    id: "potion_night_vision",
+    name: "Night Vision",
+    description: "A glowing green potion that smells of owl feathers.",
+    effect: "Grants the ability to see clearly in darkness.",
+    basePrice: 45,
+    quantity: 0,
+  },
+  {
+    id: "potion_levitation",
+    name: "Levitation Elixir",
+    description: "A silvery potion that seems weightless in its bottle.",
+    effect: "Allows the drinker to float several feet above the ground.",
+    basePrice: 70,
+    quantity: 0,
+  },
+  {
+    id: "potion_truth",
+    name: "Truth Serum",
+    description: "A clear potion with a single swirl of gold.",
+    effect: "Compels the drinker to speak only truth for a short time.",
+    basePrice: 80,
+    quantity: 0,
+  },
+  {
+    id: "potion_youth",
+    name: "Youth Restoration",
+    description: "A pearly white potion that smells of fresh morning dew.",
+    effect: "Temporarily restores youthful appearance and energy.",
+    basePrice: 100,
+    quantity: 0,
+  },
+  {
+    id: "potion_shapeshifting",
+    name: "Shapeshifter's Brew",
+    description: "A swirling potion that constantly changes color.",
+    effect: "Allows limited transformation into a small animal.",
+    basePrice: 120,
+    quantity: 0,
+  },
+  {
+    id: "potion_courage",
+    name: "Liquid Courage",
+    description: "A fiery red potion that pulses with inner light.",
+    effect: "Banishes fear and instills bravery in the drinker.",
+    basePrice: 40,
+    quantity: 0,
+  },
+  {
+    id: "potion_silence",
+    name: "Veil of Silence",
+    description: "A misty gray potion that makes no sound when shaken.",
+    effect: "Creates a zone of silence around the drinker.",
+    basePrice: 55,
+    quantity: 0,
+  },
 ]
 
 export const initialTools: Tool[] = [
@@ -227,6 +399,30 @@ export const initialTools: Tool[] = [
     basePrice: 40,
     quantity: 0,
   },
+  {
+    id: "tool_alembic",
+    name: "Crystal Alembic",
+    description: "A delicate distillation apparatus made of enchanted crystal.",
+    function: "Allows for extraction of pure essences from ingredients.",
+    basePrice: 75,
+    quantity: 0,
+  },
+  {
+    id: "tool_grimoire",
+    name: "Alchemist's Grimoire",
+    description: "An ancient book containing secret potion formulas.",
+    function: "Provides hints for creating experimental potions.",
+    basePrice: 100,
+    quantity: 0,
+  },
+  {
+    id: "tool_filter",
+    name: "Moonsilk Filter",
+    description: "A fine mesh filter woven from threads of moonlight.",
+    function: "Removes impurities from potions, increasing potency.",
+    basePrice: 60,
+    quantity: 0,
+  },
 ]
 
 export const initialNpcs: NPC[] = [
@@ -269,6 +465,86 @@ export const initialNpcs: NPC[] = [
     tradingDialog: "The village has many sick this season. I'm in desperate need of remedies.",
     interest: "potion_healing", // Will be randomized
     priceModifier: 1.0, // Will be randomized
+  },
+  {
+    id: "npc_explorer",
+    name: "Daring Explorer",
+    description: "A rugged adventurer with weathered skin and tales of distant lands.",
+    tradingDialog: "I need potions for my next expedition into uncharted territories. What do you have?",
+    interest: "potion_fire_resistance", // Will be randomized
+    priceModifier: 1.15, // Will be randomized
+  },
+  {
+    id: "npc_noble",
+    name: "Court Noble",
+    description: "An elegantly dressed aristocrat with a haughty demeanor and expensive taste.",
+    tradingDialog: "I require the finest potions for an upcoming royal gathering. I pay well for quality.",
+    interest: "potion_love", // Will be randomized
+    priceModifier: 1.3, // Will be randomized
+  },
+  {
+    id: "npc_scholar",
+    name: "Arcane Scholar",
+    description: "A focused academic with ink-stained fingers and a book always at hand.",
+    tradingDialog: "I'm researching the effects of various magical concoctions. Would you assist my studies?",
+    interest: "potion_wisdom", // Will be randomized
+    priceModifier: 1.1, // Will be randomized
+  },
+  {
+    id: "npc_ranger",
+    name: "Forest Ranger",
+    description: "A quiet, observant guardian of the woods with keen eyes and a bow on their back.",
+    tradingDialog: "The creatures of the forest grow restless. I need potions to help maintain peace.",
+    interest: "potion_invisibility", // Will be randomized
+    priceModifier: 1.05, // Will be randomized
+  },
+  {
+    id: "npc_mystic",
+    name: "Wandering Mystic",
+    description: "A serene figure draped in flowing robes with symbols of celestial bodies.",
+    tradingDialog: "The stars have guided me to your shop. I seek potions to commune with higher realms.",
+    interest: "potion_sleep", // Will be randomized
+    priceModifier: 1.2, // Will be randomized
+  },
+  {
+    id: "npc_diver",
+    name: "Deep Sea Diver",
+    description: "A muscular individual with salt-crusted hair and a necklace of unusual shells.",
+    tradingDialog: "The depths hold many secrets. I need special brews to explore the ocean floor.",
+    interest: "potion_water_breathing", // Will be randomized
+    priceModifier: 1.25, // Will be randomized
+  },
+  {
+    id: "npc_thief",
+    name: "Shadow Guild Thief",
+    description: "A nimble figure dressed in dark clothing with a perpetual smirk.",
+    tradingDialog: "I'm willing to pay handsomely for potions that aid in... discreet activities.",
+    interest: "potion_invisibility", // Will be randomized
+    priceModifier: 1.4, // Will be randomized
+  },
+  {
+    id: "npc_bard",
+    name: "Traveling Bard",
+    description: "A charismatic performer with a lute strapped to their back and a voice like honey.",
+    tradingDialog: "I seek potions to enhance my performances and captivate audiences across the realm.",
+    interest: "potion_courage", // Will be randomized
+    priceModifier: 1.1, // Will be randomized
+  },
+  {
+    id: "npc_hermit",
+    name: "Mountain Hermit",
+    description: "An elderly recluse with a long white beard and eyes that have seen centuries.",
+    tradingDialog: "In my solitude, I've gained wisdom. Now I seek potions to extend my meditation.",
+    interest: "potion_youth", // Will be randomized
+    priceModifier: 1.15, // Will be randomized
+  },
+  {
+    id: "npc_hunter",
+    name: "Night Hunter",
+    description: "A mysterious hunter with unnaturally sharp teeth and pale skin.",
+    tradingDialog: "The creatures I hunt only emerge in darkness. I need potions to aid my nocturnal pursuits.",
+    interest: "potion_night_vision", // Will be randomized
+    priceModifier: 1.3, // Will be randomized
   },
 ]
 
@@ -345,5 +621,76 @@ export const potionRecipes: Recipe[] = [
       { id: "berry_juniper", quantity: 2 },
     ],
   },
+  {
+    id: "recipe_water_breathing",
+    potionId: "potion_water_breathing",
+    ingredients: [
+      { id: "crystal_moonstone", quantity: 1 },
+      { id: "herb_nettle", quantity: 2 },
+      { id: "flower_lotus", quantity: 1 },
+    ],
+  },
+  {
+    id: "recipe_night_vision",
+    potionId: "potion_night_vision",
+    ingredients: [
+      { id: "mushroom_morel", quantity: 2 },
+      { id: "crystal_obsidian", quantity: 1 },
+      { id: "berry_elderberry", quantity: 2 },
+    ],
+  },
+  {
+    id: "recipe_levitation",
+    potionId: "potion_levitation",
+    ingredients: [
+      { id: "flower_lotus", quantity: 2 },
+      { id: "crystal_moonstone", quantity: 1 },
+      { id: "mushroom_amanita", quantity: 1 },
+    ],
+  },
+  {
+    id: "recipe_truth",
+    potionId: "potion_truth",
+    ingredients: [
+      { id: "herb_sage", quantity: 2 },
+      { id: "crystal_quartz", quantity: 2 },
+      { id: "flower_chamomile", quantity: 1 },
+    ],
+  },
+  {
+    id: "recipe_youth",
+    potionId: "potion_youth",
+    ingredients: [
+      { id: "flower_rose", quantity: 2 },
+      { id: "crystal_jade", quantity: 1 },
+      { id: "root_mandrake", quantity: 1 },
+    ],
+  },
+  {
+    id: "recipe_shapeshifting",
+    potionId: "potion_shapeshifting",
+    ingredients: [
+      { id: "mushroom_amanita", quantity: 2 },
+      { id: "root_mandrake", quantity: 1 },
+      { id: "crystal_moonstone", quantity: 1 },
+    ],
+  },
+  {
+    id: "recipe_courage",
+    potionId: "potion_courage",
+    ingredients: [
+      { id: "herb_basil", quantity: 2 },
+      { id: "root_ginger", quantity: 1 },
+      { id: "berry_elderberry", quantity: 1 },
+    ],
+  },
+  {
+    id: "recipe_silence",
+    potionId: "potion_silence",
+    ingredients: [
+      { id: "herb_valerian", quantity: 2 },
+      { id: "crystal_obsidian", quantity: 1 },
+      { id: "mushroom_morel", quantity: 1 },
+    ],
+  },
 ]
-

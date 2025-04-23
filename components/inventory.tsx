@@ -4,9 +4,11 @@ import { useState, useRef } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import type { Inventory as InventoryType } from "@/lib/types"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useMobile } from "@/hooks/use-mobile"
 
 interface InventoryProps {
   inventory: InventoryType
@@ -16,7 +18,9 @@ interface InventoryProps {
 export default function Inventory({ inventory, marketDemand }: InventoryProps) {
   const [selectedItem, setSelectedItem] = useState<any>(null)
   const [activeTab, setActiveTab] = useState("ingredients")
+  const [dialogOpen, setDialogOpen] = useState(false)
   const tabsListRef = useRef<HTMLDivElement>(null)
+  const isMobile = useMobile()
 
   const getMarketValue = (item: any) => {
     if ("effect" in item) {
@@ -45,6 +49,13 @@ export default function Inventory({ inventory, marketDemand }: InventoryProps) {
         left: 100,
         behavior: "smooth",
       })
+    }
+  }
+
+  const handleItemClick = (item: any, type: string) => {
+    setSelectedItem({ ...item, type })
+    if (isMobile) {
+      setDialogOpen(true)
     }
   }
 
@@ -100,7 +111,7 @@ export default function Inventory({ inventory, marketDemand }: InventoryProps) {
                         <div
                           key={item.id}
                           className={`p-2 rounded-md cursor-pointer flex justify-between items-center ${selectedItem?.id === item.id && selectedItem?.type === "ingredient" ? "bg-purple-700" : "hover:bg-purple-800/50"}`}
-                          onClick={() => setSelectedItem({ ...item, type: "ingredient" })}
+                          onClick={() => handleItemClick(item, "ingredient")}
                         >
                           <span>{item.name}</span>
                           <Badge variant="outline">{item.quantity}</Badge>
@@ -127,7 +138,7 @@ export default function Inventory({ inventory, marketDemand }: InventoryProps) {
                         <div
                           key={item.id}
                           className={`p-2 rounded-md cursor-pointer flex justify-between items-center ${selectedItem?.id === item.id && selectedItem?.type === "potion" ? "bg-purple-700" : "hover:bg-purple-800/50"}`}
-                          onClick={() => setSelectedItem({ ...item, type: "potion" })}
+                          onClick={() => handleItemClick(item, "potion")}
                         >
                           <span>{item.name}</span>
                           <Badge variant="outline">{item.quantity}</Badge>
@@ -154,7 +165,7 @@ export default function Inventory({ inventory, marketDemand }: InventoryProps) {
                         <div
                           key={item.id}
                           className={`p-2 rounded-md cursor-pointer flex justify-between items-center ${selectedItem?.id === item.id && selectedItem?.type === "tool" ? "bg-purple-700" : "hover:bg-purple-800/50"}`}
-                          onClick={() => setSelectedItem({ ...item, type: "tool" })}
+                          onClick={() => handleItemClick(item, "tool")}
                         >
                           <span>{item.name}</span>
                           <Badge variant="outline">{item.quantity}</Badge>
@@ -171,7 +182,7 @@ export default function Inventory({ inventory, marketDemand }: InventoryProps) {
         </div>
 
         <div className="md:col-span-2">
-          {selectedItem ? (
+          {!isMobile && selectedItem ? (
             <Card>
               <CardHeader>
                 <CardTitle>{selectedItem.name}</CardTitle>
@@ -220,14 +231,70 @@ export default function Inventory({ inventory, marketDemand }: InventoryProps) {
                 </div>
               </CardContent>
             </Card>
-          ) : (
+          ) : !isMobile ? (
             <div className="h-full flex items-center justify-center">
               <p className="text-purple-400">Select an item to view details</p>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
+
+      {/* Mobile Dialog for Item Details */}
+      {isMobile && (
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogContent className="bg-purple-900 text-white border-purple-700 max-w-[90vw] sm:max-w-lg">
+            {selectedItem && (
+              <>
+                <DialogHeader>
+                  <DialogTitle>{selectedItem.name}</DialogTitle>
+                  <DialogDescription className="text-purple-300">
+                    {selectedItem.type === "ingredient" && "Growth time: " + selectedItem.growthTime + " days"}
+                    {selectedItem.type === "potion" && "Magical potion"}
+                    {selectedItem.type === "tool" && "Useful tool"}
+                  </DialogDescription>
+                </DialogHeader>
+
+                <div className="space-y-4">
+                  <p className="text-sm text-purple-200">{selectedItem.description}</p>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-purple-800/30 p-3 rounded-md">
+                      <h3 className="font-semibold text-sm mb-1">Quantity</h3>
+                      <p className="text-sm">{selectedItem.quantity}</p>
+                    </div>
+
+                    <div className="bg-purple-800/30 p-3 rounded-md">
+                      <h3 className="font-semibold text-sm mb-1">Market Value</h3>
+                      <p className="text-sm">{getMarketValue(selectedItem)} gold</p>
+                    </div>
+                  </div>
+
+                  {selectedItem.type === "potion" && (
+                    <div className="bg-purple-800/30 p-3 rounded-md">
+                      <h3 className="font-semibold text-sm mb-1">Effect</h3>
+                      <p className="text-sm">{selectedItem.effect}</p>
+                    </div>
+                  )}
+
+                  {selectedItem.type === "ingredient" && (
+                    <div className="bg-purple-800/30 p-3 rounded-md">
+                      <h3 className="font-semibold text-sm mb-1">Properties</h3>
+                      <p className="text-sm">{selectedItem.properties}</p>
+                    </div>
+                  )}
+
+                  {selectedItem.type === "tool" && (
+                    <div className="bg-purple-800/30 p-3 rounded-md">
+                      <h3 className="font-semibold text-sm mb-1">Function</h3>
+                      <p className="text-sm">{selectedItem.function}</p>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   )
 }
-

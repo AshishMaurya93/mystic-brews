@@ -5,8 +5,17 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog"
 import type { Inventory, Recipe } from "@/lib/types"
 import { initialPotions, potionRecipes, initialIngredients } from "@/lib/game-data"
+import { useMobile } from "@/hooks/use-mobile"
 
 interface PotionCraftingProps {
   inventory: Inventory
@@ -17,6 +26,8 @@ interface PotionCraftingProps {
 
 export default function PotionCrafting({ inventory, addToInventory, removeFromInventory, toast }: PotionCraftingProps) {
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null)
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const isMobile = useMobile()
 
   const canCraftPotion = (recipe: Recipe): boolean => {
     return recipe.ingredients.every((req) => {
@@ -56,6 +67,17 @@ export default function PotionCrafting({ inventory, addToInventory, removeFromIn
         description: `You successfully crafted a ${potion.name}!`,
       })
     }
+
+    if (isMobile) {
+      setDialogOpen(false)
+    }
+  }
+
+  const handleRecipeClick = (recipe: Recipe) => {
+    setSelectedRecipe(recipe)
+    if (isMobile) {
+      setDialogOpen(true)
+    }
   }
 
   return (
@@ -89,7 +111,7 @@ export default function PotionCrafting({ inventory, addToInventory, removeFromIn
                           key={recipe.id}
                           variant={selectedRecipe?.id === recipe.id ? "default" : "outline"}
                           className="w-full justify-start text-sm sm:text-base py-2 px-3"
-                          onClick={() => setSelectedRecipe(recipe)}
+                          onClick={() => handleRecipeClick(recipe)}
                         >
                           <div className="flex justify-between w-full items-center">
                             <span className="truncate mr-2">{potion?.name}</span>
@@ -121,7 +143,7 @@ export default function PotionCrafting({ inventory, addToInventory, removeFromIn
                             key={recipe.id}
                             variant={selectedRecipe?.id === recipe.id ? "default" : "outline"}
                             className="w-full justify-start text-sm sm:text-base py-2 px-3"
-                            onClick={() => setSelectedRecipe(recipe)}
+                            onClick={() => handleRecipeClick(recipe)}
                           >
                             <span className="truncate mr-2">{potion?.name}</span>
                           </Button>
@@ -142,7 +164,7 @@ export default function PotionCrafting({ inventory, addToInventory, removeFromIn
                             key={recipe.id}
                             variant={selectedRecipe?.id === recipe.id ? "default" : "outline"}
                             className="w-full justify-start text-sm sm:text-base py-2 px-3"
-                            onClick={() => setSelectedRecipe(recipe)}
+                            onClick={() => handleRecipeClick(recipe)}
                           >
                             <span className="truncate mr-2">{potion?.name}</span>
                           </Button>
@@ -156,7 +178,7 @@ export default function PotionCrafting({ inventory, addToInventory, removeFromIn
         </div>
 
         <div className="md:col-span-2">
-          {selectedRecipe ? (
+          {!isMobile && selectedRecipe ? (
             <Card>
               <CardHeader>
                 <CardTitle>{initialPotions.find((p) => p.id === selectedRecipe.potionId)?.name}</CardTitle>
@@ -198,14 +220,67 @@ export default function PotionCrafting({ inventory, addToInventory, removeFromIn
                 </Button>
               </CardContent>
             </Card>
-          ) : (
+          ) : !isMobile ? (
             <div className="h-full flex items-center justify-center">
               <p className="text-purple-400">Select a recipe to view details</p>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
+
+      {/* Mobile Dialog for Recipe Details */}
+      {isMobile && (
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogContent className="bg-purple-900 text-white border-purple-700 max-w-[90vw] sm:max-w-lg">
+            {selectedRecipe && (
+              <>
+                <DialogHeader>
+                  <DialogTitle>{initialPotions.find((p) => p.id === selectedRecipe.potionId)?.name}</DialogTitle>
+                  <DialogDescription className="text-purple-300">
+                    {initialPotions.find((p) => p.id === selectedRecipe.potionId)?.description}
+                  </DialogDescription>
+                </DialogHeader>
+
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="font-semibold text-sm mb-2">Required Ingredients:</h3>
+                    <ul className="space-y-2">
+                      {selectedRecipe.ingredients.map((req) => {
+                        const ingredient = inventory.ingredients.find((i) => i.id === req.id)
+                        const hasEnough = ingredient && ingredient.quantity >= req.quantity
+
+                        return (
+                          <li key={req.id} className="flex justify-between text-sm">
+                            <span className="truncate mr-2">
+                              {initialIngredients.find((i) => i.id === req.id)?.name} x{req.quantity}
+                            </span>
+                            <span className={hasEnough ? "text-green-400" : "text-red-400"}>
+                              {ingredient ? ingredient.quantity : 0}/{req.quantity}
+                            </span>
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h3 className="font-semibold text-sm mb-2">Effect:</h3>
+                    <p className="text-sm text-purple-200">
+                      {initialPotions.find((p) => p.id === selectedRecipe.potionId)?.effect}
+                    </p>
+                  </div>
+
+                  <DialogFooter>
+                    <Button className="w-full" disabled={!canCraftPotion(selectedRecipe)} onClick={craftPotion}>
+                      Craft Potion
+                    </Button>
+                  </DialogFooter>
+                </div>
+              </>
+            )}
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   )
 }
-

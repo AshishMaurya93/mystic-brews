@@ -4,8 +4,17 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog"
 import type { Inventory, NPC, Potion } from "@/lib/types"
 import { initialPotions } from "@/lib/game-data"
+import { useMobile } from "@/hooks/use-mobile"
 
 interface TradingProps {
   npcs: NPC[]
@@ -28,6 +37,9 @@ export default function Trading({
 }: TradingProps) {
   const [selectedNpc, setSelectedNpc] = useState<NPC | null>(null)
   const [selectedPotion, setSelectedPotion] = useState<Potion | null>(null)
+  const [npcDialogOpen, setNpcDialogOpen] = useState(false)
+  const [potionDialogOpen, setPotionDialogOpen] = useState(false)
+  const isMobile = useMobile()
 
   const getNpcInterest = (npc: NPC) => {
     return initialPotions.find((p) => p.id === npc.interest)
@@ -60,6 +72,24 @@ export default function Trading({
     if (!remainingPotion) {
       setSelectedPotion(null)
     }
+
+    if (isMobile) {
+      setPotionDialogOpen(false)
+    }
+  }
+
+  const handleNpcClick = (npc: NPC) => {
+    setSelectedNpc(npc)
+    if (isMobile) {
+      setNpcDialogOpen(true)
+    }
+  }
+
+  const handlePotionClick = (potion: Potion) => {
+    setSelectedPotion(potion)
+    if (isMobile) {
+      setPotionDialogOpen(true)
+    }
   }
 
   return (
@@ -83,7 +113,7 @@ export default function Trading({
                     <Card
                       key={npc.id}
                       className={`cursor-pointer hover:bg-purple-800/20 ${selectedNpc?.id === npc.id ? "border-purple-500" : ""}`}
-                      onClick={() => setSelectedNpc(npc)}
+                      onClick={() => handleNpcClick(npc)}
                     >
                       <CardHeader className="p-2 sm:p-3 pb-0">
                         <CardTitle className="text-base sm:text-lg">{npc.name}</CardTitle>
@@ -106,7 +136,7 @@ export default function Trading({
         </div>
 
         <div className="md:col-span-2">
-          {selectedNpc ? (
+          {!isMobile && selectedNpc ? (
             <Card>
               <CardHeader>
                 <CardTitle>Trading with {selectedNpc.name}</CardTitle>
@@ -122,7 +152,7 @@ export default function Trading({
                         <div
                           key={potion.id}
                           className={`p-2 sm:p-3 rounded-md cursor-pointer border ${selectedPotion?.id === potion.id ? "border-purple-500 bg-purple-800/30" : "border-transparent hover:bg-purple-800/20"}`}
-                          onClick={() => setSelectedPotion(potion)}
+                          onClick={() => handlePotionClick(potion)}
                         >
                           <div className="flex justify-between items-center mb-1">
                             <span className="font-medium text-sm sm:text-base">{potion.name}</span>
@@ -177,14 +207,135 @@ export default function Trading({
                 </Button>
               </CardFooter>
             </Card>
-          ) : (
+          ) : !isMobile ? (
             <div className="h-full flex items-center justify-center">
               <p className="text-purple-400">Select a trader to begin trading</p>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
+
+      {/* Mobile Dialog for NPC Details */}
+      {isMobile && (
+        <>
+          <Dialog open={npcDialogOpen} onOpenChange={setNpcDialogOpen}>
+            <DialogContent className="bg-purple-900 text-white border-purple-700 max-w-[90vw] sm:max-w-lg">
+              {selectedNpc && (
+                <>
+                  <DialogHeader>
+                    <DialogTitle>Trading with {selectedNpc.name}</DialogTitle>
+                    <DialogDescription className="text-purple-300">
+                      {selectedNpc.tradingDialog || "What do you have to offer?"}
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  <div className="space-y-4">
+                    <div className="bg-purple-800/30 p-3 rounded-md">
+                      <p className="text-sm text-purple-200 mb-2">{selectedNpc.description}</p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs">Interested in:</span>
+                        <Badge variant="outline" className="bg-purple-700/30 text-xs">
+                          {getNpcInterest(selectedNpc)?.name || "Unknown"}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="font-semibold text-sm mb-2">Your Potions:</h3>
+                      {inventory.potions.length > 0 ? (
+                        <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                          {inventory.potions.map((potion) => (
+                            <div
+                              key={potion.id}
+                              className="p-2 rounded-md cursor-pointer border border-purple-700 hover:bg-purple-800/30"
+                              onClick={() => {
+                                setSelectedPotion(potion)
+                                setNpcDialogOpen(false)
+                                setPotionDialogOpen(true)
+                              }}
+                            >
+                              <div className="flex justify-between items-center">
+                                <span className="font-medium text-sm">{potion.name}</span>
+                                <Badge variant="outline">{potion.quantity}</Badge>
+                              </div>
+                              <div className="flex justify-between items-center mt-1">
+                                <span className="text-xs text-purple-300">
+                                  {potion.id === selectedNpc.interest ? "(Interested!)" : ""}
+                                </span>
+                                <span className="text-xs">{getPotionPrice(potion, selectedNpc)} gold</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-center text-purple-400 p-2">You don't have any potions to trade</p>
+                      )}
+                    </div>
+
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-purple-300">Your gold: {gold}</span>
+                      <Button variant="outline" onClick={() => setNpcDialogOpen(false)} size="sm">
+                        Close
+                      </Button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={potionDialogOpen} onOpenChange={setPotionDialogOpen}>
+            <DialogContent className="bg-purple-900 text-white border-purple-700 max-w-[90vw] sm:max-w-lg">
+              {selectedPotion && selectedNpc && (
+                <>
+                  <DialogHeader>
+                    <DialogTitle>{selectedPotion.name}</DialogTitle>
+                    <DialogDescription className="text-purple-300">Trading with {selectedNpc.name}</DialogDescription>
+                  </DialogHeader>
+
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-sm text-purple-200 mb-2">{selectedPotion.description}</p>
+                      <p className="text-sm text-purple-200">{selectedPotion.effect}</p>
+                    </div>
+
+                    <div className="bg-purple-800/30 p-3 rounded-md">
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium text-sm">Price:</span>
+                        <Badge
+                          className={selectedPotion.id === selectedNpc.interest ? "bg-green-700" : "bg-purple-700"}
+                        >
+                          {getPotionPrice(selectedPotion, selectedNpc)} gold
+                        </Badge>
+                      </div>
+                      {selectedPotion.id === selectedNpc.interest && (
+                        <p className="text-xs text-green-400 mt-1">{selectedNpc.name} is interested in this potion!</p>
+                      )}
+                    </div>
+
+                    <DialogFooter className="flex flex-col gap-2">
+                      <Button onClick={sellPotion} className="w-full">
+                        Sell to {selectedNpc.name}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setPotionDialogOpen(false)
+                          setNpcDialogOpen(true)
+                        }}
+                        className="w-full"
+                      >
+                        Back to Trader
+                      </Button>
+                    </DialogFooter>
+                  </div>
+                </>
+              )}
+            </DialogContent>
+          </Dialog>
+        </>
+      )}
     </div>
   )
 }
-
+// Note: The above code is a React component for a trading system in a game. It allows players to trade potions with NPCs, view their inventory, and manage their gold. The component is responsive and includes mobile dialogs for better user experience on smaller screens.
