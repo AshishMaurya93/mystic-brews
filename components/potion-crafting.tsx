@@ -22,15 +22,42 @@ interface PotionCraftingProps {
   addToInventory: (item: any) => void
   removeFromInventory: (itemType: "ingredients" | "potions" | "tools", itemId: string, amount?: number) => void
   toast: any
+  craftingMasteryActive?: boolean
 }
 
-export default function PotionCrafting({ inventory, addToInventory, removeFromInventory, toast }: PotionCraftingProps) {
+export default function PotionCrafting({
+  inventory,
+  addToInventory,
+  removeFromInventory,
+  toast,
+  craftingMasteryActive = false,
+}: PotionCraftingProps) {
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
   const isMobile = useMobile()
 
+  const getAdjustedRecipe = (recipe: Recipe): Recipe => {
+    if (!craftingMasteryActive) return recipe
+
+    // Create a deep copy of the recipe
+    const adjustedRecipe = {
+      ...recipe,
+      ingredients: [...recipe.ingredients].map((ing) => ({ ...ing })),
+    }
+
+    // Reduce each ingredient quantity by 1 (minimum 1)
+    adjustedRecipe.ingredients = adjustedRecipe.ingredients.map((ing) => ({
+      ...ing,
+      quantity: Math.max(1, ing.quantity - 1),
+    }))
+
+    return adjustedRecipe
+  }
+
   const canCraftPotion = (recipe: Recipe): boolean => {
-    return recipe.ingredients.every((req) => {
+    const adjustedRecipe = getAdjustedRecipe(recipe)
+
+    return adjustedRecipe.ingredients.every((req) => {
       const ingredient = inventory.ingredients.find((i) => i.id === req.id)
       return ingredient && ingredient.quantity >= req.quantity
     })
@@ -38,6 +65,9 @@ export default function PotionCrafting({ inventory, addToInventory, removeFromIn
 
   const craftPotion = () => {
     if (!selectedRecipe) return
+
+    // Get the adjusted recipe with crafting mastery if active
+    const adjustedRecipe = getAdjustedRecipe(selectedRecipe)
 
     // Check if player has all required ingredients
     if (!canCraftPotion(selectedRecipe)) {
@@ -50,7 +80,7 @@ export default function PotionCrafting({ inventory, addToInventory, removeFromIn
     }
 
     // Remove ingredients from inventory
-    selectedRecipe.ingredients.forEach((req) => {
+    adjustedRecipe.ingredients.forEach((req) => {
       removeFromInventory("ingredients", req.id, req.quantity)
     })
 
@@ -84,6 +114,15 @@ export default function PotionCrafting({ inventory, addToInventory, removeFromIn
     <div>
       <h2 className="text-2xl font-bold mb-2">Potion Crafting</h2>
       <p className="text-purple-300 mb-4">Combine ingredients to create magical potions.</p>
+
+      {craftingMasteryActive && (
+        <div className="mb-4 p-2 bg-purple-700/30 rounded-lg">
+          <p className="text-sm text-purple-200">
+            <span className="font-semibold">Crafting Mastery Active:</span> All recipes require 1 fewer ingredient
+            (minimum 1)!
+          </p>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
         <div className="md:col-span-1">
@@ -190,14 +229,19 @@ export default function PotionCrafting({ inventory, addToInventory, removeFromIn
                 <div className="mb-4">
                   <h3 className="font-semibold mb-2">Required Ingredients:</h3>
                   <ul className="space-y-2">
-                    {selectedRecipe.ingredients.map((req) => {
+                    {getAdjustedRecipe(selectedRecipe).ingredients.map((req) => {
                       const ingredient = inventory.ingredients.find((i) => i.id === req.id)
                       const hasEnough = ingredient && ingredient.quantity >= req.quantity
+                      const originalReq = selectedRecipe.ingredients.find((i) => i.id === req.id)
+                      const isReduced = craftingMasteryActive && originalReq && originalReq.quantity > req.quantity
 
                       return (
                         <li key={req.id} className="flex justify-between text-sm">
                           <span className="truncate mr-2">
                             {initialIngredients.find((i) => i.id === req.id)?.name} x{req.quantity}
+                            {isReduced && (
+                              <span className="text-green-400 ml-1">(reduced from {originalReq.quantity})</span>
+                            )}
                           </span>
                           <span className={hasEnough ? "text-green-400" : "text-red-400"}>
                             {ingredient ? ingredient.quantity : 0}/{req.quantity}
@@ -245,14 +289,19 @@ export default function PotionCrafting({ inventory, addToInventory, removeFromIn
                   <div>
                     <h3 className="font-semibold text-sm mb-2">Required Ingredients:</h3>
                     <ul className="space-y-2">
-                      {selectedRecipe.ingredients.map((req) => {
+                      {getAdjustedRecipe(selectedRecipe).ingredients.map((req) => {
                         const ingredient = inventory.ingredients.find((i) => i.id === req.id)
                         const hasEnough = ingredient && ingredient.quantity >= req.quantity
+                        const originalReq = selectedRecipe.ingredients.find((i) => i.id === req.id)
+                        const isReduced = craftingMasteryActive && originalReq && originalReq.quantity > req.quantity
 
                         return (
                           <li key={req.id} className="flex justify-between text-sm">
                             <span className="truncate mr-2">
                               {initialIngredients.find((i) => i.id === req.id)?.name} x{req.quantity}
+                              {isReduced && (
+                                <span className="text-green-400 ml-1">(reduced from {originalReq.quantity})</span>
+                              )}
                             </span>
                             <span className={hasEnough ? "text-green-400" : "text-red-400"}>
                               {ingredient ? ingredient.quantity : 0}/{req.quantity}

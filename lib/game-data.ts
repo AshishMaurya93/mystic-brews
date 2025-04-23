@@ -217,6 +217,79 @@ export const initialIngredients: Ingredient[] = [
     basePrice: 9,
     quantity: 0,
   },
+  // New ingredients for new potions
+  {
+    id: "crystal_ruby",
+    name: "Ruby Crystal",
+    description: "Deep red crystal that pulses with inner fire.",
+    properties: "Energy-boosting, passion-igniting, and vitality-enhancing.",
+    growthTime: 12,
+    basePrice: 45,
+    quantity: 0,
+  },
+  {
+    id: "herb_nightshade",
+    name: "Midnight Nightshade",
+    description: "Rare herb that only blooms under the full moon.",
+    properties: "Shadow-walking, illusion-creating, and stealth-enhancing.",
+    growthTime: 8,
+    basePrice: 30,
+    quantity: 0,
+  },
+  {
+    id: "flower_sunblossom",
+    name: "Sunblossom",
+    description: "Radiant golden flower that tracks the sun's movement.",
+    properties: "Light-generating, warmth-providing, and clarity-bringing.",
+    growthTime: 6,
+    basePrice: 18,
+    quantity: 0,
+  },
+  {
+    id: "root_dreamroot",
+    name: "Dreamroot",
+    description: "Twisted root that glows faintly with a blue light.",
+    properties: "Dream-walking, prophecy-revealing, and insight-granting.",
+    growthTime: 9,
+    basePrice: 27,
+    quantity: 0,
+  },
+  {
+    id: "crystal_emerald",
+    name: "Emerald Shard",
+    description: "Vibrant green crystal with growth-enhancing properties.",
+    properties: "Nature-connecting, growth-accelerating, and prosperity-bringing.",
+    growthTime: 11,
+    basePrice: 40,
+    quantity: 0,
+  },
+  {
+    id: "mushroom_ghostcap",
+    name: "Ghostcap Mushroom",
+    description: "Translucent mushroom that's cool to the touch.",
+    properties: "Spirit-seeing, ethereal-walking, and boundary-crossing.",
+    growthTime: 7,
+    basePrice: 25,
+    quantity: 0,
+  },
+  {
+    id: "berry_frostberry",
+    name: "Frostberries",
+    description: "Ice-blue berries that never melt and remain cold.",
+    properties: "Cold-resistance, preservation, and winter-harnessing.",
+    growthTime: 5,
+    basePrice: 15,
+    quantity: 0,
+  },
+  {
+    id: "herb_dragonbreath",
+    name: "Dragon's Breath Herb",
+    description: "Fiery red leaves that feel warm even when dried.",
+    properties: "Fire-breathing, heat-resistance, and courage-instilling.",
+    growthTime: 8,
+    basePrice: 22,
+    quantity: 0,
+  },
 ]
 
 export const initialPotions: Potion[] = [
@@ -346,6 +419,87 @@ export const initialPotions: Potion[] = [
     description: "A misty gray potion that makes no sound when shaken.",
     effect: "Creates a zone of silence around the drinker.",
     basePrice: 55,
+    quantity: 0,
+  },
+  // New potions with unique gameplay benefits
+  {
+    id: "potion_growth_acceleration",
+    name: "Growth Accelerator",
+    description: "A vibrant green potion with swirling emerald particles.",
+    effect: "Reduces garden growth time by 50% for one full day cycle.",
+    basePrice: 85,
+    quantity: 0,
+  },
+  {
+    id: "potion_market_insight",
+    name: "Market Insight",
+    description: "A shimmering potion with floating golden coins inside.",
+    effect: "Reveals optimal selling prices and increases all sales by 20% for one day.",
+    basePrice: 95,
+    quantity: 0,
+  },
+  {
+    id: "potion_ingredient_duplication",
+    name: "Ingredient Duplicator",
+    description: "A bubbling purple mixture that seems to multiply within its container.",
+    effect: "Has a 30% chance to duplicate any harvested ingredient for one day.",
+    basePrice: 110,
+    quantity: 0,
+  },
+  {
+    id: "potion_crafting_mastery",
+    name: "Crafting Mastery",
+    description: "A deep blue potion with glowing runes that shift and change.",
+    effect: "Reduces ingredient requirements for all potions by 1 (minimum 1) for one day.",
+    basePrice: 130,
+    quantity: 0,
+  },
+  {
+    id: "potion_haggling",
+    name: "Merchant's Tongue",
+    description: "A honey-colored potion that tastes of silver and gold.",
+    effect: "Improves buying prices by 15% and selling prices by 15% for one day.",
+    basePrice: 90,
+    quantity: 0,
+  },
+  {
+    id: "potion_garden_expansion",
+    name: "Garden's Blessing",
+    description: "A rich, soil-scented potion with tiny flowers floating inside.",
+    effect: "Temporarily unlocks one additional garden plot for three days.",
+    basePrice: 150,
+    quantity: 0,
+  },
+  {
+    id: "potion_rare_ingredient_finder",
+    name: "Ingredient Seeker",
+    description: "A compass-shaped bottle with swirling mist that points in changing directions.",
+    effect: "Guarantees one rare ingredient will appear in the shop on the next day.",
+    basePrice: 100,
+    quantity: 0,
+  },
+  {
+    id: "potion_npc_attraction",
+    name: "Trader's Call",
+    description: "A bell-shaped bottle with a potion that chimes when shaken.",
+    effect: "Attracts an additional rare trader with premium prices on the next day.",
+    basePrice: 120,
+    quantity: 0,
+  },
+  {
+    id: "potion_quality_enhancer",
+    name: "Quality Enhancer",
+    description: "A crystal-clear potion with rainbow reflections.",
+    effect: "Increases the quality and value of all crafted potions by 25% for one day.",
+    basePrice: 105,
+    quantity: 0,
+  },
+  {
+    id: "potion_gold_transmutation",
+    name: "Gold Transmuter",
+    description: "A metallic potion that feels heavy and shifts like liquid gold.",
+    effect: "Converts 5 of any ingredient into 50 gold. One-time use.",
+    basePrice: 75,
     quantity: 0,
   },
 ]
@@ -546,6 +700,31 @@ export const initialNpcs: NPC[] = [
     interest: "potion_night_vision", // Will be randomized
     priceModifier: 1.3, // Will be randomized
   },
+  // New NPCs interested in gameplay-enhancing potions
+  {
+    id: "npc_gardener",
+    name: "Master Gardener",
+    description: "A soil-stained expert with plants woven into their hair and clothes.",
+    tradingDialog: "My gardens flourish, but I'm always seeking new ways to enhance growth and vitality.",
+    interest: "potion_growth_acceleration", // Will be randomized
+    priceModifier: 1.35, // Will be randomized
+  },
+  {
+    id: "npc_economist",
+    name: "Royal Economist",
+    description: "A sharp-eyed individual with ink-stained fingers and a ledger always at hand.",
+    tradingDialog: "The market fluctuates, but with the right potions, one can always stay ahead of trends.",
+    interest: "potion_market_insight", // Will be randomized
+    priceModifier: 1.4, // Will be randomized
+  },
+  {
+    id: "npc_artificer",
+    name: "Magical Artificer",
+    description: "A creative inventor with glowing runes tattooed on their arms.",
+    tradingDialog: "I create wonders through magical crafting, but certain potions could enhance my work.",
+    interest: "potion_crafting_mastery", // Will be randomized
+    priceModifier: 1.45, // Will be randomized
+  },
 ]
 
 export const potionRecipes: Recipe[] = [
@@ -691,6 +870,97 @@ export const potionRecipes: Recipe[] = [
       { id: "herb_valerian", quantity: 2 },
       { id: "crystal_obsidian", quantity: 1 },
       { id: "mushroom_morel", quantity: 1 },
+    ],
+  },
+  // New recipes for gameplay-enhancing potions
+  {
+    id: "recipe_growth_acceleration",
+    potionId: "potion_growth_acceleration",
+    ingredients: [
+      { id: "crystal_emerald", quantity: 1 },
+      { id: "herb_basil", quantity: 2 },
+      { id: "flower_sunblossom", quantity: 2 },
+    ],
+  },
+  {
+    id: "recipe_market_insight",
+    potionId: "potion_market_insight",
+    ingredients: [
+      { id: "crystal_jade", quantity: 1 },
+      { id: "herb_sage", quantity: 2 },
+      { id: "crystal_ruby", quantity: 1 },
+    ],
+  },
+  {
+    id: "recipe_ingredient_duplication",
+    potionId: "potion_ingredient_duplication",
+    ingredients: [
+      { id: "mushroom_ghostcap", quantity: 2 },
+      { id: "crystal_moonstone", quantity: 1 },
+      { id: "root_mandrake", quantity: 1 },
+    ],
+  },
+  {
+    id: "recipe_crafting_mastery",
+    potionId: "potion_crafting_mastery",
+    ingredients: [
+      { id: "crystal_amethyst", quantity: 1 },
+      { id: "root_dreamroot", quantity: 2 },
+      { id: "mushroom_amanita", quantity: 1 },
+    ],
+  },
+  {
+    id: "recipe_haggling",
+    potionId: "potion_haggling",
+    ingredients: [
+      { id: "herb_sage", quantity: 1 },
+      { id: "crystal_jade", quantity: 1 },
+      { id: "flower_lotus", quantity: 1 },
+    ],
+  },
+  {
+    id: "recipe_garden_expansion",
+    potionId: "potion_garden_expansion",
+    ingredients: [
+      { id: "crystal_emerald", quantity: 1 },
+      { id: "root_mandrake", quantity: 1 },
+      { id: "flower_sunblossom", quantity: 2 },
+    ],
+  },
+  {
+    id: "recipe_rare_ingredient_finder",
+    potionId: "potion_rare_ingredient_finder",
+    ingredients: [
+      { id: "crystal_quartz", quantity: 2 },
+      { id: "herb_nightshade", quantity: 1 },
+      { id: "mushroom_morel", quantity: 1 },
+    ],
+  },
+  {
+    id: "recipe_npc_attraction",
+    potionId: "potion_npc_attraction",
+    ingredients: [
+      { id: "flower_rose", quantity: 2 },
+      { id: "herb_lavender", quantity: 2 },
+      { id: "crystal_ruby", quantity: 1 },
+    ],
+  },
+  {
+    id: "recipe_quality_enhancer",
+    potionId: "potion_quality_enhancer",
+    ingredients: [
+      { id: "crystal_quartz", quantity: 2 },
+      { id: "crystal_amethyst", quantity: 1 },
+      { id: "flower_lotus", quantity: 1 },
+    ],
+  },
+  {
+    id: "recipe_gold_transmutation",
+    potionId: "potion_gold_transmutation",
+    ingredients: [
+      { id: "crystal_ruby", quantity: 1 },
+      { id: "herb_basil", quantity: 2 },
+      { id: "root_ginger", quantity: 2 },
     ],
   },
 ]

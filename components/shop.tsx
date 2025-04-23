@@ -19,9 +19,22 @@ interface ShopProps {
   addToInventory: (item: any) => void
   marketDemand: Record<string, number>
   daysPassed: number
+  haggleActive?: boolean
+  rareIngredientActive?: boolean
+  getModifiedPrice?: (basePrice: number, isBuying: boolean) => number
 }
 
-export default function Shop({ gold, updateGold, inventory, addToInventory, marketDemand, daysPassed }: ShopProps) {
+export default function Shop({
+  gold,
+  updateGold,
+  inventory,
+  addToInventory,
+  marketDemand,
+  daysPassed,
+  haggleActive = false,
+  rareIngredientActive = false,
+  getModifiedPrice,
+}: ShopProps) {
   const [selectedItem, setSelectedItem] = useState<any>(null)
   const [buyQuantity, setBuyQuantity] = useState(1)
   const [sellQuantity, setSellQuantity] = useState(1)
@@ -57,6 +70,20 @@ export default function Shop({ gold, updateGold, inventory, addToInventory, mark
       return (ingredient.id.charCodeAt(0) + daysPassed) % 3 !== 0
     })
 
+    // Add a rare ingredient if the effect is active
+    if (rareIngredientActive) {
+      // Find a rare ingredient that's not already in the shop
+      const rareIngredients = initialIngredients.filter(
+        (ing) => ing.basePrice > 25 && !ingredientsStock.some((i) => i.id === ing.id),
+      )
+
+      if (rareIngredients.length > 0) {
+        // Add a random rare ingredient
+        const rareIngredient = rareIngredients[Math.floor(Math.random() * rareIngredients.length)]
+        ingredientsStock.push(rareIngredient)
+      }
+    }
+
     // Filter tools with original rotation logic
     const toolsStock = initialTools.filter((_, index) => (index + daysPassed) % 4 !== 0)
 
@@ -73,13 +100,22 @@ export default function Shop({ gold, updateGold, inventory, addToInventory, mark
     // Apply markup for buying, discount for selling
     const modifier = isBuying ? 1.2 : 0.8
 
+    let price = 0
     if ("effect" in item) {
       // It's a potion
       const basePrice = item.basePrice
       const demand = marketDemand[item.id] || 1
-      return Math.round(basePrice * demand * modifier)
+      price = Math.round(basePrice * demand * modifier)
+    } else {
+      price = Math.round(item.basePrice * modifier)
     }
-    return Math.round(item.basePrice * modifier)
+
+    // Apply haggling effect if active and getModifiedPrice is provided
+    if (getModifiedPrice) {
+      return getModifiedPrice(price, isBuying)
+    }
+
+    return price
   }
 
   const buyItem = () => {
@@ -200,10 +236,23 @@ export default function Shop({ gold, updateGold, inventory, addToInventory, mark
     }
   }
 
+  // Check if an item is rare (for highlighting)
+  const isRareItem = (item: any) => {
+    return item.basePrice > 25
+  }
+
   return (
     <div>
       <h2 className="text-2xl font-bold mb-2">Shop</h2>
       <p className="text-purple-300 mb-4">Buy ingredients and tools, or sell your items.</p>
+
+      {haggleActive && (
+        <div className="mb-4 p-2 bg-purple-700/30 rounded-lg">
+          <p className="text-sm text-purple-200">
+            <span className="font-semibold">Haggling Active:</span> Buy for 15% less and sell for 15% more!
+          </p>
+        </div>
+      )}
 
       <Tabs defaultValue="buy" className="w-full" value={activeTab} onValueChange={setActiveTab}>
         <div className="relative mb-4">
@@ -281,7 +330,14 @@ export default function Shop({ gold, updateGold, inventory, addToInventory, mark
                             className={`p-2 rounded-md cursor-pointer flex justify-between items-center ${selectedItem?.id === item.id ? "bg-purple-700" : "hover:bg-purple-800/50"}`}
                             onClick={() => handleItemClick(item)}
                           >
-                            <span>{item.name}</span>
+                            <span className="flex items-center">
+                              {item.name}
+                              {isRareItem(item) && (
+                                <Badge variant="outline" className="ml-2 bg-amber-800/30 text-xs">
+                                  Rare
+                                </Badge>
+                              )}
+                            </span>
                             <Badge variant="outline">{getMarketValue(item)} gold</Badge>
                           </div>
                         ))}
@@ -304,7 +360,14 @@ export default function Shop({ gold, updateGold, inventory, addToInventory, mark
                             className={`p-2 rounded-md cursor-pointer flex justify-between items-center ${selectedItem?.id === item.id ? "bg-purple-700" : "hover:bg-purple-800/50"}`}
                             onClick={() => handleItemClick(item)}
                           >
-                            <span>{item.name}</span>
+                            <span className="flex items-center">
+                              {item.name}
+                              {isRareItem(item) && (
+                                <Badge variant="outline" className="ml-2 bg-amber-800/30 text-xs">
+                                  Rare
+                                </Badge>
+                              )}
+                            </span>
                             <Badge variant="outline">{getMarketValue(item)} gold</Badge>
                           </div>
                         ))}
@@ -335,6 +398,7 @@ export default function Shop({ gold, updateGold, inventory, addToInventory, mark
                       <div className="bg-purple-800/30 p-3 rounded-md">
                         <h3 className="font-semibold mb-1">Price</h3>
                         <p>{getMarketValue(selectedItem)} gold each</p>
+                        {haggleActive && <p className="text-xs text-green-400 mt-1">15% haggling discount applied!</p>}
                       </div>
 
                       <div className="bg-purple-800/30 p-3 rounded-md">
@@ -527,6 +591,7 @@ export default function Shop({ gold, updateGold, inventory, addToInventory, mark
                       <div className="bg-purple-800/30 p-3 rounded-md">
                         <h3 className="font-semibold mb-1">Sell Price</h3>
                         <p>{getMarketValue(selectedItem, false)} gold each</p>
+                        {haggleActive && <p className="text-xs text-green-400 mt-1">15% haggling bonus applied!</p>}
                       </div>
 
                       <div className="bg-purple-800/30 p-3 rounded-md">
@@ -594,6 +659,11 @@ export default function Shop({ gold, updateGold, inventory, addToInventory, mark
                     <div className="bg-purple-800/30 p-3 rounded-md">
                       <h3 className="font-semibold text-sm mb-1">{activeTab === "buy" ? "Price" : "Sell Price"}</h3>
                       <p className="text-sm">{getMarketValue(selectedItem, activeTab === "buy")} gold each</p>
+                      {haggleActive && (
+                        <p className="text-xs text-green-400 mt-1">
+                          {activeTab === "buy" ? "15% discount applied!" : "15% bonus applied!"}
+                        </p>
+                      )}
                     </div>
 
                     <div className="bg-purple-800/30 p-3 rounded-md">
@@ -647,4 +717,3 @@ export default function Shop({ gold, updateGold, inventory, addToInventory, mark
     </div>
   )
 }
-// Note: The code above is a React component for a shop interface in a potion-making game. It allows players to buy and sell ingredients, tools, and potions, with features like dynamic pricing based on market demand and a responsive design for mobile users.

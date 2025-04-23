@@ -30,6 +30,18 @@ export default function PotionGame() {
     daysPassed: 0,
     marketDemand: {},
     npcs: [],
+    // New gameplay effect states
+    activeEffects: {
+      growthAcceleration: 0, // Days remaining
+      marketInsight: 0,
+      ingredientDuplication: 0,
+      craftingMastery: 0,
+      haggling: 0,
+      gardenExpansion: 0,
+      qualityEnhancer: 0,
+      rareIngredientNextDay: false,
+      rareTraderNextDay: false,
+    },
   })
 
   const [activeTab, setActiveTab] = useState("garden")
@@ -142,6 +154,17 @@ export default function PotionGame() {
       daysPassed: 1,
       marketDemand: demand,
       npcs: gameNpcs,
+      activeEffects: {
+        growthAcceleration: 0,
+        marketInsight: 0,
+        ingredientDuplication: 0,
+        craftingMastery: 0,
+        haggling: 0,
+        gardenExpansion: 0,
+        qualityEnhancer: 0,
+        rareIngredientNextDay: false,
+        rareTraderNextDay: false,
+      },
     })
 
     toast({
@@ -156,10 +179,13 @@ export default function PotionGame() {
       const updatedPlots = [...prev.garden.plots].map((plot) => {
         if (!plot) return null
 
+        // Apply growth acceleration effect if active
+        const growthBoost = prev.activeEffects.growthAcceleration > 0 ? 2 : 1 // Double growth if effect is active
+
         if (plot.growthStage < plot.ingredient.growthTime) {
           return {
             ...plot,
-            growthStage: plot.growthStage + 1,
+            growthStage: Math.min(plot.growthStage + growthBoost, plot.ingredient.growthTime),
           }
         }
         return plot
@@ -173,25 +199,83 @@ export default function PotionGame() {
         newDemand[potionId] = Math.max(0.5, Math.min(1.5, newDemand[potionId] + change))
       })
 
-      // Refresh NPCs every 3 days
-      const updatedNpcs =
-        prev.daysPassed % 3 === 0
-          ? initialNpcs.map((npc) => ({
-              ...npc,
-              interest: initialPotions[Math.floor(Math.random() * initialPotions.length)].id,
-              priceModifier: Math.random() * 0.4 + 0.8,
-            }))
-          : prev.npcs
+      // Refresh NPCs every 3 days or if rare trader effect is active
+      let updatedNpcs = prev.npcs
+      if (prev.daysPassed % 3 === 0 || prev.activeEffects.rareTraderNextDay) {
+        updatedNpcs = initialNpcs.map((npc) => ({
+          ...npc,
+          interest: initialPotions[Math.floor(Math.random() * initialPotions.length)].id,
+          priceModifier: Math.random() * 0.4 + 0.8,
+        }))
+
+        // Add a rare trader if the effect is active
+        if (prev.activeEffects.rareTraderNextDay) {
+          // Add one of the special NPCs interested in gameplay potions
+          const specialNpcs = initialNpcs.slice(-3) // Last 3 NPCs are the special ones
+          const rareTrader = specialNpcs[Math.floor(Math.random() * specialNpcs.length)]
+
+          updatedNpcs.push({
+            ...rareTrader,
+            interest: initialPotions[Math.floor(Math.random() * initialPotions.length)].id,
+            priceModifier: 1.5, // Premium prices
+          })
+
+          toast({
+            title: "Rare Trader Arrived",
+            description: `${rareTrader.name} has heard of your shop and arrived to trade!`,
+          })
+        }
+      }
+
+      // Update active effects (decrement days remaining)
+      const updatedEffects = {
+        growthAcceleration: Math.max(0, prev.activeEffects.growthAcceleration - 1),
+        marketInsight: Math.max(0, prev.activeEffects.marketInsight - 1),
+        ingredientDuplication: Math.max(0, prev.activeEffects.ingredientDuplication - 1),
+        craftingMastery: Math.max(0, prev.activeEffects.craftingMastery - 1),
+        haggling: Math.max(0, prev.activeEffects.haggling - 1),
+        gardenExpansion: Math.max(0, prev.activeEffects.gardenExpansion - 1),
+        qualityEnhancer: Math.max(0, prev.activeEffects.qualityEnhancer - 1),
+        rareIngredientNextDay: false, // Reset after day advances
+        rareTraderNextDay: false, // Reset after day advances
+      }
+
+      // Notify when effects expire
+      Object.entries(prev.activeEffects).forEach(([effect, value]) => {
+        if (value === 1 && typeof value === "number") {
+          // Will expire this day
+          const effectName = effect
+            .replace(/([A-Z])/g, " $1") // Add spaces before capital letters
+            .replace(/^./, (str) => str.toUpperCase()) // Capitalize first letter
+
+          toast({
+            title: `${effectName} Expired`,
+            description: `The ${effectName} effect has worn off.`,
+          })
+        }
+      })
+
+      // Handle garden expansion effect expiring
+      if (prev.activeEffects.gardenExpansion === 1) {
+        toast({
+          title: "Garden Plot Returned",
+          description: "The temporary garden plot has returned to nature.",
+        })
+      }
 
       return {
         ...prev,
         garden: {
           ...prev.garden,
           plots: updatedPlots,
+          // Reduce unlocked plots if garden expansion is expiring
+          unlocked:
+            prev.activeEffects.gardenExpansion === 1 ? Math.min(prev.garden.unlocked - 1, 9) : prev.garden.unlocked,
         },
         daysPassed: prev.daysPassed + 1,
         marketDemand: newDemand,
         npcs: updatedNpcs,
+        activeEffects: updatedEffects,
       }
     })
 
@@ -208,18 +292,43 @@ export default function PotionGame() {
       if ("growthTime" in item) {
         // It's an ingredient
         const existingItem = newState.inventory.ingredients.find((i) => i.id === item.id)
+
+        // Check for ingredient duplication effect (30% chance)
+        const duplicateChance = prev.activeEffects.ingredientDuplication > 0 ? 0.3 : 0
+        const isDuplicated = Math.random() < duplicateChance
+
+        const quantity = isDuplicated ? (item.quantity || 1) * 2 : item.quantity || 1
+
+        if (isDuplicated) {
+          toast({
+            title: "Ingredient Duplicated!",
+            description: `Your Ingredient Duplicator potion doubled your ${item.name} harvest!`,
+          })
+        }
+
         if (existingItem) {
-          existingItem.quantity += item.quantity || 1
+          existingItem.quantity += quantity
         } else {
-          newState.inventory.ingredients.push({ ...item, quantity: item.quantity || 1 })
+          newState.inventory.ingredients.push({ ...item, quantity })
         }
       } else if ("effect" in item) {
         // It's a potion
         const existingItem = newState.inventory.potions.find((i) => i.id === item.id)
+
+        // Apply quality enhancer effect if active
+        const enhancedItem = { ...item }
+        if (prev.activeEffects.qualityEnhancer > 0) {
+          enhancedItem.basePrice = Math.round(item.basePrice * 1.25) // 25% increase in value
+        }
+
         if (existingItem) {
-          existingItem.quantity += item.quantity || 1
+          existingItem.quantity += enhancedItem.quantity || 1
+          // Update the base price if it was enhanced
+          if (prev.activeEffects.qualityEnhancer > 0) {
+            existingItem.basePrice = enhancedItem.basePrice
+          }
         } else {
-          newState.inventory.potions.push({ ...item, quantity: item.quantity || 1 })
+          newState.inventory.potions.push({ ...enhancedItem, quantity: enhancedItem.quantity || 1 })
         }
       } else {
         // It's a tool
@@ -272,6 +381,254 @@ export default function PotionGame() {
     }
   }
 
+  // Function to activate potion effects
+  const activatePotionEffect = (potionId: string) => {
+    setGameState((prev) => {
+      const newState = { ...prev }
+
+      // Remove the potion from inventory
+      const potionIndex = newState.inventory.potions.findIndex((p) => p.id === potionId)
+      if (potionIndex === -1) return prev // Potion not found
+
+      if (newState.inventory.potions[potionIndex].quantity > 1) {
+        newState.inventory.potions[potionIndex].quantity -= 1
+      } else {
+        newState.inventory.potions.splice(potionIndex, 1)
+      }
+
+      // Apply the effect based on potion type
+      switch (potionId) {
+        case "potion_growth_acceleration":
+          newState.activeEffects.growthAcceleration = 1 // 1 day
+          toast({
+            title: "Growth Acceleration Activated",
+            description: "Your garden plants will grow twice as fast for 1 day.",
+          })
+          break
+
+        case "potion_market_insight":
+          newState.activeEffects.marketInsight = 1 // 1 day
+          toast({
+            title: "Market Insight Activated",
+            description: "You'll receive 20% more gold from all sales for 1 day.",
+          })
+          break
+
+        case "potion_ingredient_duplication":
+          newState.activeEffects.ingredientDuplication = 1 // 1 day
+          toast({
+            title: "Ingredient Duplicator Activated",
+            description: "You have a 30% chance to double harvested ingredients for 1 day.",
+          })
+          break
+
+        case "potion_crafting_mastery":
+          newState.activeEffects.craftingMastery = 1 // 1 day
+          toast({
+            title: "Crafting Mastery Activated",
+            description: "Potion recipes require 1 fewer ingredient (minimum 1) for 1 day.",
+          })
+          break
+
+        case "potion_haggling":
+          newState.activeEffects.haggling = 1 // 1 day
+          toast({
+            title: "Merchant's Tongue Activated",
+            description: "Buy for 15% less and sell for 15% more for 1 day.",
+          })
+          break
+
+        case "potion_garden_expansion":
+          // Only add a plot if we're not at max
+          if (newState.garden.unlocked < 9) {
+            newState.activeEffects.gardenExpansion = 3 // 3 days
+            newState.garden.unlocked += 1
+            toast({
+              title: "Garden's Blessing Activated",
+              description: "You've temporarily unlocked an additional garden plot for 3 days.",
+            })
+          } else {
+            toast({
+              title: "Garden Already Full",
+              description: "Your garden already has the maximum number of plots.",
+              variant: "destructive",
+            })
+            // Return the potion to inventory
+            if (potionIndex !== -1) {
+              if (newState.inventory.potions[potionIndex]) {
+                newState.inventory.potions[potionIndex].quantity += 1
+              } else {
+                const potion = initialPotions.find((p) => p.id === potionId)
+                if (potion) {
+                  newState.inventory.potions.push({ ...potion, quantity: 1 })
+                }
+              }
+            }
+          }
+          break
+
+        case "potion_rare_ingredient_finder":
+          newState.activeEffects.rareIngredientNextDay = true
+          toast({
+            title: "Ingredient Seeker Activated",
+            description: "A rare ingredient will appear in the shop tomorrow.",
+          })
+          break
+
+        case "potion_npc_attraction":
+          newState.activeEffects.rareTraderNextDay = true
+          toast({
+            title: "Trader's Call Activated",
+            description: "A rare trader will visit your shop tomorrow.",
+          })
+          break
+
+        case "potion_quality_enhancer":
+          newState.activeEffects.qualityEnhancer = 1 // 1 day
+          toast({
+            title: "Quality Enhancer Activated",
+            description: "All potions you craft today will be 25% more valuable.",
+          })
+          break
+
+        case "potion_gold_transmutation":
+          // Find an ingredient to transmute (prioritize common ingredients)
+          const ingredients = [...newState.inventory.ingredients].sort((a, b) => b.quantity - a.quantity)
+          if (ingredients.length > 0 && ingredients[0].quantity >= 5) {
+            const ingredient = ingredients[0]
+            // Remove 5 of the ingredient
+            const ingredientIndex = newState.inventory.ingredients.findIndex((i) => i.id === ingredient.id)
+            if (newState.inventory.ingredients[ingredientIndex].quantity > 5) {
+              newState.inventory.ingredients[ingredientIndex].quantity -= 5
+            } else {
+              newState.inventory.ingredients.splice(ingredientIndex, 1)
+            }
+            // Add 50 gold
+            newState.gold += 50
+            toast({
+              title: "Gold Transmutation Successful",
+              description: `Transmuted 5 ${ingredient.name} into 50 gold!`,
+            })
+          } else {
+            toast({
+              title: "Transmutation Failed",
+              description: "You need at least 5 of an ingredient to transmute into gold.",
+              variant: "destructive",
+            })
+            // Return the potion to inventory
+            if (potionIndex !== -1) {
+              if (newState.inventory.potions[potionIndex]) {
+                newState.inventory.potions[potionIndex].quantity += 1
+              } else {
+                const potion = initialPotions.find((p) => p.id === potionId)
+                if (potion) {
+                  newState.inventory.potions.push({ ...potion, quantity: 1 })
+                }
+              }
+            }
+          }
+          break
+
+        default:
+          // Not a gameplay effect potion
+          toast({
+            title: "Cannot Activate",
+            description: "This potion cannot be activated for gameplay effects.",
+            variant: "destructive",
+          })
+          // Return the potion to inventory
+          if (potionIndex !== -1) {
+            if (newState.inventory.potions[potionIndex]) {
+              newState.inventory.potions[potionIndex].quantity += 1
+            } else {
+              const potion = initialPotions.find((p) => p.id === potionId)
+              if (potion) {
+                newState.inventory.potions.push({ ...potion, quantity: 1 })
+              }
+            }
+          }
+      }
+
+      return newState
+    })
+  }
+
+  // Get modified prices based on active effects
+  const getModifiedPrice = (basePrice: number, isBuying: boolean) => {
+    let price = basePrice
+
+    // Apply market insight effect (20% more when selling)
+    if (!isBuying && gameState?.activeEffects?.marketInsight > 0) {
+      price = Math.round(price * 1.2)
+    }
+
+    // Apply haggling effect (15% discount when buying, 15% more when selling)
+    if (gameState?.activeEffects?.haggling > 0) {
+      price = isBuying
+        ? Math.round(price * 0.85) // 15% discount when buying
+        : Math.round(price * 1.15) // 15% more when selling
+    }
+
+    return price
+  }
+
+  // Get active effects for display
+  const getActiveEffects = () => {
+    const effects = []
+ 
+    if (gameState?.activeEffects?.growthAcceleration > 0) {
+      effects.push(
+        `Growth Acceleration (${gameState?.activeEffects?.growthAcceleration} day${gameState?.activeEffects?.growthAcceleration > 1 ? "s" : ""})`,
+      )
+    }
+
+    if (gameState?.activeEffects?.marketInsight > 0) {
+      effects.push(
+        `Market Insight (${gameState?.activeEffects?.marketInsight} day${gameState?.activeEffects?.marketInsight > 1 ? "s" : ""})`,
+      )
+    }
+
+    if (gameState?.activeEffects?.ingredientDuplication > 0) {
+      effects.push(
+        `Ingredient Duplication (${gameState?.activeEffects?.ingredientDuplication} day${gameState?.activeEffects?.ingredientDuplication > 1 ? "s" : ""})`,
+      )
+    }
+
+    if (gameState?.activeEffects?.craftingMastery > 0) {
+      effects.push(
+        `Crafting Mastery (${gameState?.activeEffects?.craftingMastery} day${gameState?.activeEffects?.craftingMastery > 1 ? "s" : ""})`,
+      )
+    }
+
+    if (gameState?.activeEffects?.haggling > 0) {
+      effects.push(
+        `Haggling (${gameState?.activeEffects?.haggling} day${gameState?.activeEffects?.haggling > 1 ? "s" : ""})`,
+      )
+    }
+
+    if (gameState?.activeEffects?.gardenExpansion > 0) {
+      effects.push(
+        `Garden Expansion (${gameState?.activeEffects?.gardenExpansion} day${gameState?.activeEffects?.gardenExpansion > 1 ? "s" : ""})`,
+      )
+    }
+
+    if (gameState?.activeEffects?.qualityEnhancer > 0) {
+      effects.push(
+        `Quality Enhancer (${gameState?.activeEffects?.qualityEnhancer} day${gameState?.activeEffects?.qualityEnhancer > 1 ? "s" : ""})`,
+      )
+    }
+
+    if (gameState?.activeEffects?.rareIngredientNextDay) {
+      effects.push("Rare Ingredient (next day)")
+    }
+
+    if (gameState?.activeEffects?.rareTraderNextDay) {
+      effects.push("Rare Trader (next day)")
+    }
+
+    return effects
+  }
+
   return (
     <div className="container mx-auto px-2 sm:px-4 py-4 max-w-6xl">
       <header className="mb-4 sm:mb-6 text-center">
@@ -290,6 +647,20 @@ export default function PotionGame() {
           Next Day
         </Button>
       </div>
+
+      {/* Active Effects Display */}
+      {getActiveEffects().length > 0 && (
+        <div className="mb-4 p-2 bg-purple-800/30 rounded-lg">
+          <h3 className="text-sm font-semibold mb-1 text-purple-200">Active Effects:</h3>
+          <div className="flex flex-wrap gap-2">
+            {getActiveEffects().map((effect, index) => (
+              <span key={index} className="text-xs bg-purple-700/50 px-2 py-1 rounded-md text-purple-100">
+                {effect}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       <Tabs defaultValue="garden" className="w-full" value={activeTab} onValueChange={setActiveTab}>
         <div className="relative mb-4">
@@ -353,11 +724,16 @@ export default function PotionGame() {
             addToInventory={addToInventory}
             removeFromInventory={removeFromInventory}
             toast={toast}
+            craftingMasteryActive={gameState?.activeEffects?.craftingMastery > 0}
           />
         </TabsContent>
 
         <TabsContent value="inventory" className="bg-purple-800/30 p-4 rounded-lg">
-          <Inventory inventory={gameState.inventory} marketDemand={gameState.marketDemand} />
+          <Inventory
+            inventory={gameState.inventory}
+            marketDemand={gameState.marketDemand}
+            activatePotionEffect={activatePotionEffect}
+          />
         </TabsContent>
 
         <TabsContent value="shop" className="bg-purple-800/30 p-4 rounded-lg">
@@ -368,6 +744,9 @@ export default function PotionGame() {
             addToInventory={addToInventory}
             marketDemand={gameState.marketDemand}
             daysPassed={gameState.daysPassed}
+            haggleActive={gameState?.activeEffects?.haggling > 0}
+            rareIngredientActive={gameState?.activeEffects?.rareIngredientNextDay}
+            getModifiedPrice={getModifiedPrice}
           />
         </TabsContent>
 
@@ -380,6 +759,9 @@ export default function PotionGame() {
             removeFromInventory={removeFromInventory}
             addToInventory={addToInventory}
             marketDemand={gameState.marketDemand}
+            marketInsightActive={gameState?.activeEffects?.marketInsight > 0}
+            haggleActive={gameState?.activeEffects?.haggling > 0}
+            getModifiedPrice={getModifiedPrice}
           />
         </TabsContent>
       </Tabs>
@@ -388,4 +770,3 @@ export default function PotionGame() {
     </div>
   )
 }
-

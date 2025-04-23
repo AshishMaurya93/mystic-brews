@@ -61,6 +61,18 @@ export interface Recipe {
   }[]
 }
 
+export interface ActiveEffects {
+  growthAcceleration: number // Days remaining
+  marketInsight: number
+  ingredientDuplication: number
+  craftingMastery: number
+  haggling: number
+  gardenExpansion: number
+  qualityEnhancer: number
+  rareIngredientNextDay: boolean
+  rareTraderNextDay: boolean
+}
+
 export interface GameState {
   gold: number
   inventory: Inventory
@@ -68,5 +80,5 @@ export interface GameState {
   daysPassed: number
   marketDemand: Record<string, number>
   npcs: NPC[]
+  activeEffects: ActiveEffects
 }
-

@@ -4,7 +4,14 @@ import { useState, useRef } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog"
 import type { Inventory as InventoryType } from "@/lib/types"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -13,14 +20,29 @@ import { useMobile } from "@/hooks/use-mobile"
 interface InventoryProps {
   inventory: InventoryType
   marketDemand: Record<string, number>
+  activatePotionEffect?: (potionId: string) => void
 }
 
-export default function Inventory({ inventory, marketDemand }: InventoryProps) {
+export default function Inventory({ inventory, marketDemand, activatePotionEffect }: InventoryProps) {
   const [selectedItem, setSelectedItem] = useState<any>(null)
   const [activeTab, setActiveTab] = useState("ingredients")
   const [dialogOpen, setDialogOpen] = useState(false)
   const tabsListRef = useRef<HTMLDivElement>(null)
   const isMobile = useMobile()
+
+  // List of gameplay effect potions
+  const gameplayPotions = [
+    "potion_growth_acceleration",
+    "potion_market_insight",
+    "potion_ingredient_duplication",
+    "potion_crafting_mastery",
+    "potion_haggling",
+    "potion_garden_expansion",
+    "potion_rare_ingredient_finder",
+    "potion_npc_attraction",
+    "potion_quality_enhancer",
+    "potion_gold_transmutation",
+  ]
 
   const getMarketValue = (item: any) => {
     if ("effect" in item) {
@@ -56,6 +78,21 @@ export default function Inventory({ inventory, marketDemand }: InventoryProps) {
     setSelectedItem({ ...item, type })
     if (isMobile) {
       setDialogOpen(true)
+    }
+  }
+
+  // Check if a potion has gameplay effects
+  const hasGameplayEffect = (potionId: string) => {
+    return gameplayPotions.includes(potionId)
+  }
+
+  // Handle activating a potion effect
+  const handleActivatePotion = () => {
+    if (selectedItem && activatePotionEffect) {
+      activatePotionEffect(selectedItem.id)
+      if (isMobile) {
+        setDialogOpen(false)
+      }
     }
   }
 
@@ -140,7 +177,14 @@ export default function Inventory({ inventory, marketDemand }: InventoryProps) {
                           className={`p-2 rounded-md cursor-pointer flex justify-between items-center ${selectedItem?.id === item.id && selectedItem?.type === "potion" ? "bg-purple-700" : "hover:bg-purple-800/50"}`}
                           onClick={() => handleItemClick(item, "potion")}
                         >
-                          <span>{item.name}</span>
+                          <span className="flex items-center">
+                            {item.name}
+                            {hasGameplayEffect(item.id) && (
+                              <Badge variant="outline" className="ml-2 bg-green-800/30 text-xs">
+                                Effect
+                              </Badge>
+                            )}
+                          </span>
                           <Badge variant="outline">{item.quantity}</Badge>
                         </div>
                       ))}
@@ -229,6 +273,12 @@ export default function Inventory({ inventory, marketDemand }: InventoryProps) {
                     </div>
                   )}
                 </div>
+
+                {selectedItem.type === "potion" && hasGameplayEffect(selectedItem.id) && activatePotionEffect && (
+                  <Button onClick={handleActivatePotion} className="w-full mt-4 bg-green-700 hover:bg-green-600">
+                    Activate Potion Effect
+                  </Button>
+                )}
               </CardContent>
             </Card>
           ) : !isMobile ? (
@@ -288,6 +338,14 @@ export default function Inventory({ inventory, marketDemand }: InventoryProps) {
                       <h3 className="font-semibold text-sm mb-1">Function</h3>
                       <p className="text-sm">{selectedItem.function}</p>
                     </div>
+                  )}
+
+                  {selectedItem.type === "potion" && hasGameplayEffect(selectedItem.id) && activatePotionEffect && (
+                    <DialogFooter>
+                      <Button onClick={handleActivatePotion} className="w-full bg-green-700 hover:bg-green-600">
+                        Activate Potion Effect
+                      </Button>
+                    </DialogFooter>
                   )}
                 </div>
               </>

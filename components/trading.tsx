@@ -24,6 +24,9 @@ interface TradingProps {
   removeFromInventory: (itemType: "ingredients" | "potions" | "tools", itemId: string, amount?: number) => void
   addToInventory: (item: any) => void
   marketDemand: Record<string, number>
+  marketInsightActive?: boolean
+  haggleActive?: boolean
+  getModifiedPrice?: (basePrice: number, isBuying: boolean) => number
 }
 
 export default function Trading({
@@ -34,6 +37,9 @@ export default function Trading({
   removeFromInventory,
   addToInventory,
   marketDemand,
+  marketInsightActive = false,
+  haggleActive = false,
+  getModifiedPrice,
 }: TradingProps) {
   const [selectedNpc, setSelectedNpc] = useState<NPC | null>(null)
   const [selectedPotion, setSelectedPotion] = useState<Potion | null>(null)
@@ -53,7 +59,24 @@ export default function Trading({
     // NPCs pay more for potions they're interested in
     const interestModifier = potion.id === npc.interest ? 1.5 : 1
 
-    return Math.round(basePrice * demand * npcModifier * interestModifier)
+    let price = Math.round(basePrice * demand * npcModifier * interestModifier)
+
+    // Apply market insight effect (20% more when selling)
+    if (marketInsightActive) {
+      price = Math.round(price * 1.2)
+    }
+
+    // Apply haggling effect (15% more when selling)
+    if (haggleActive) {
+      price = Math.round(price * 1.15)
+    }
+
+    // Use getModifiedPrice if provided (this will apply both effects if active)
+    if (getModifiedPrice) {
+      return getModifiedPrice(Math.round(basePrice * demand * npcModifier * interestModifier), false)
+    }
+
+    return price
   }
 
   const sellPotion = () => {
@@ -96,6 +119,21 @@ export default function Trading({
     <div>
       <h2 className="text-2xl font-bold mb-2">Trading</h2>
       <p className="text-purple-300 mb-4">Trade with NPCs for better prices on your potions.</p>
+
+      {(marketInsightActive || haggleActive) && (
+        <div className="mb-4 p-2 bg-purple-700/30 rounded-lg">
+          {marketInsightActive && (
+            <p className="text-sm text-purple-200 mb-1">
+              <span className="font-semibold">Market Insight Active:</span> Receive 20% more gold from all sales!
+            </p>
+          )}
+          {haggleActive && (
+            <p className="text-sm text-purple-200">
+              <span className="font-semibold">Haggling Active:</span> Sell for 15% more gold!
+            </p>
+          )}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
         <div className="md:col-span-1">
@@ -168,6 +206,15 @@ export default function Trading({
                             >
                               {getPotionPrice(potion, selectedNpc)} gold
                               {potion.id === selectedNpc.interest && " (Interested!)"}
+                              {(marketInsightActive || haggleActive) && (
+                                <span className="text-green-400 ml-1">
+                                  {marketInsightActive && haggleActive
+                                    ? "(+35%)"
+                                    : marketInsightActive
+                                      ? "(+20%)"
+                                      : "(+15%)"}
+                                </span>
+                              )}
                             </span>
                           </div>
                         </div>
@@ -262,7 +309,18 @@ export default function Trading({
                                 <span className="text-xs text-purple-300">
                                   {potion.id === selectedNpc.interest ? "(Interested!)" : ""}
                                 </span>
-                                <span className="text-xs">{getPotionPrice(potion, selectedNpc)} gold</span>
+                                <span className="text-xs">
+                                  {getPotionPrice(potion, selectedNpc)} gold
+                                  {(marketInsightActive || haggleActive) && (
+                                    <span className="text-green-400 ml-1">
+                                      {marketInsightActive && haggleActive
+                                        ? "(+35%)"
+                                        : marketInsightActive
+                                          ? "(+20%)"
+                                          : "(+15%)"}
+                                    </span>
+                                  )}
+                                </span>
                               </div>
                             </div>
                           ))}
@@ -311,6 +369,15 @@ export default function Trading({
                       {selectedPotion.id === selectedNpc.interest && (
                         <p className="text-xs text-green-400 mt-1">{selectedNpc.name} is interested in this potion!</p>
                       )}
+                      {(marketInsightActive || haggleActive) && (
+                        <p className="text-xs text-green-400 mt-1">
+                          {marketInsightActive && haggleActive
+                            ? "Market Insight (+20%) and Haggling (+15%) active!"
+                            : marketInsightActive
+                              ? "Market Insight: +20% gold!"
+                              : "Haggling: +15% gold!"}
+                        </p>
+                      )}
                     </div>
 
                     <DialogFooter className="flex flex-col gap-2">
@@ -338,4 +405,3 @@ export default function Trading({
     </div>
   )
 }
-// Note: The above code is a React component for a trading system in a game. It allows players to trade potions with NPCs, view their inventory, and manage their gold. The component is responsive and includes mobile dialogs for better user experience on smaller screens.
