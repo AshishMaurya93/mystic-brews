@@ -12,9 +12,28 @@ import Shop from "@/components/shop"
 import Trading from "@/components/trading"
 import type { GameState, Ingredient, Potion, Tool } from "@/lib/types"
 import { initialIngredients, initialPotions, initialTools, initialNpcs } from "@/lib/game-data"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, BookOpen } from "lucide-react"
+import { TutorialProvider } from "@/contexts/tutorial-context"
+import { TutorialOverlay } from "@/components/tutorial-overlay"
+import { useTutorial } from "@/contexts/tutorial-context"
 
-export default function PotionGame() {
+function TutorialButton() {
+  const { resetTutorial } = useTutorial()
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      className="absolute top-4 right-16 sm:top-6 sm:right-20 bg-purple-800/50 hover:bg-purple-700/50 text-white rounded-full"
+      onClick={resetTutorial}
+      aria-label="Restart Tutorial"
+    >
+      <BookOpen className="h-5 w-5" />
+    </Button>
+  )
+}
+
+function PotionGameContent() {
   const { toast } = useToast()
   const [gameState, setGameState] = useState<GameState>({
     gold: 100,
@@ -108,7 +127,7 @@ export default function PotionGame() {
 
   // Save game whenever state changes
   useEffect(() => {
-    if (gameState.daysPassed > 0) {
+    if (gameState?.daysPassed > 0) {
       // Don't save initial state
       localStorage.setItem("potionGameSave", JSON.stringify(gameState))
     }
@@ -180,7 +199,7 @@ export default function PotionGame() {
         if (!plot) return null
 
         // Apply growth acceleration effect if active
-        const growthBoost = prev.activeEffects.growthAcceleration > 0 ? 2 : 1 // Double growth if effect is active
+        const growthBoost = prev.activeEffects?.growthAcceleration > 0 ? 2 : 1 // Double growth if effect is active
 
         if (plot.growthStage < plot.ingredient.growthTime) {
           return {
@@ -201,7 +220,7 @@ export default function PotionGame() {
 
       // Refresh NPCs every 3 days or if rare trader effect is active
       let updatedNpcs = prev.npcs
-      if (prev.daysPassed % 3 === 0 || prev.activeEffects.rareTraderNextDay) {
+      if (prev.daysPassed % 3 === 0 || prev.activeEffects?.rareTraderNextDay) {
         updatedNpcs = initialNpcs.map((npc) => ({
           ...npc,
           interest: initialPotions[Math.floor(Math.random() * initialPotions.length)].id,
@@ -209,7 +228,7 @@ export default function PotionGame() {
         }))
 
         // Add a rare trader if the effect is active
-        if (prev.activeEffects.rareTraderNextDay) {
+        if (prev.activeEffects?.rareTraderNextDay) {
           // Add one of the special NPCs interested in gameplay potions
           const specialNpcs = initialNpcs.slice(-3) // Last 3 NPCs are the special ones
           const rareTrader = specialNpcs[Math.floor(Math.random() * specialNpcs.length)]
@@ -229,13 +248,13 @@ export default function PotionGame() {
 
       // Update active effects (decrement days remaining)
       const updatedEffects = {
-        growthAcceleration: Math.max(0, prev.activeEffects.growthAcceleration - 1),
-        marketInsight: Math.max(0, prev.activeEffects.marketInsight - 1),
-        ingredientDuplication: Math.max(0, prev.activeEffects.ingredientDuplication - 1),
-        craftingMastery: Math.max(0, prev.activeEffects.craftingMastery - 1),
-        haggling: Math.max(0, prev.activeEffects.haggling - 1),
-        gardenExpansion: Math.max(0, prev.activeEffects.gardenExpansion - 1),
-        qualityEnhancer: Math.max(0, prev.activeEffects.qualityEnhancer - 1),
+        growthAcceleration: Math.max(0, prev.activeEffects?.growthAcceleration - 1),
+        marketInsight: Math.max(0, prev.activeEffects?.marketInsight - 1),
+        ingredientDuplication: Math.max(0, prev.activeEffects?.ingredientDuplication - 1),
+        craftingMastery: Math.max(0, prev.activeEffects?.craftingMastery - 1),
+        haggling: Math.max(0, prev.activeEffects?.haggling - 1),
+        gardenExpansion: Math.max(0, prev.activeEffects?.gardenExpansion - 1),
+        qualityEnhancer: Math.max(0, prev.activeEffects?.qualityEnhancer - 1),
         rareIngredientNextDay: false, // Reset after day advances
         rareTraderNextDay: false, // Reset after day advances
       }
@@ -256,7 +275,7 @@ export default function PotionGame() {
       })
 
       // Handle garden expansion effect expiring
-      if (prev.activeEffects.gardenExpansion === 1) {
+      if (prev.activeEffects?.gardenExpansion === 1) {
         toast({
           title: "Garden Plot Returned",
           description: "The temporary garden plot has returned to nature.",
@@ -270,7 +289,7 @@ export default function PotionGame() {
           plots: updatedPlots,
           // Reduce unlocked plots if garden expansion is expiring
           unlocked:
-            prev.activeEffects.gardenExpansion === 1 ? Math.min(prev.garden.unlocked - 1, 9) : prev.garden.unlocked,
+            prev.activeEffects?.gardenExpansion === 1 ? Math.min(prev.garden.unlocked - 1, 9) : prev.garden.unlocked,
         },
         daysPassed: prev.daysPassed + 1,
         marketDemand: newDemand,
@@ -281,7 +300,7 @@ export default function PotionGame() {
 
     toast({
       title: "Day Advanced",
-      description: `Day ${gameState.daysPassed + 1} has begun.`,
+      description: `Day ${gameState?.daysPassed + 1} has begun.`,
     })
   }
 
@@ -294,7 +313,7 @@ export default function PotionGame() {
         const existingItem = newState.inventory.ingredients.find((i) => i.id === item.id)
 
         // Check for ingredient duplication effect (30% chance)
-        const duplicateChance = prev.activeEffects.ingredientDuplication > 0 ? 0.3 : 0
+        const duplicateChance = prev.activeEffects?.ingredientDuplication > 0 ? 0.3 : 0
         const isDuplicated = Math.random() < duplicateChance
 
         const quantity = isDuplicated ? (item.quantity || 1) * 2 : item.quantity || 1
@@ -317,14 +336,14 @@ export default function PotionGame() {
 
         // Apply quality enhancer effect if active
         const enhancedItem = { ...item }
-        if (prev.activeEffects.qualityEnhancer > 0) {
+        if (prev.activeEffects?.qualityEnhancer > 0) {
           enhancedItem.basePrice = Math.round(item.basePrice * 1.25) // 25% increase in value
         }
 
         if (existingItem) {
           existingItem.quantity += enhancedItem.quantity || 1
           // Update the base price if it was enhanced
-          if (prev.activeEffects.qualityEnhancer > 0) {
+          if (prev.activeEffects?.qualityEnhancer > 0) {
             existingItem.basePrice = enhancedItem.basePrice
           }
         } else {
@@ -575,7 +594,7 @@ export default function PotionGame() {
   // Get active effects for display
   const getActiveEffects = () => {
     const effects = []
- 
+
     if (gameState?.activeEffects?.growthAcceleration > 0) {
       effects.push(
         `Growth Acceleration (${gameState?.activeEffects?.growthAcceleration} day${gameState?.activeEffects?.growthAcceleration > 1 ? "s" : ""})`,
@@ -630,7 +649,10 @@ export default function PotionGame() {
   }
 
   return (
-    <div className="container mx-auto px-2 sm:px-4 py-4 max-w-6xl">
+    <div className="container mx-auto px-2 sm:px-4 py-4 max-w-6xl relative">
+      <TutorialButton />
+      <TutorialOverlay />
+
       <header className="mb-4 sm:mb-6 text-center">
         <h1 className="text-3xl sm:text-4xl font-bold mb-1 sm:mb-2 text-purple-200">Mystic Brews</h1>
         <p className="text-purple-300">Master the art of potion-making</p>
@@ -639,11 +661,15 @@ export default function PotionGame() {
       <div className="flex flex-col sm:flex-row justify-between items-center mb-4 sm:mb-6 bg-purple-800/50 p-2 sm:p-3 rounded-lg">
         <div className="flex gap-2 sm:gap-4 mb-2 sm:mb-0 w-full sm:w-auto justify-between sm:justify-start">
           <div className="bg-yellow-900/50 px-3 py-1 sm:px-4 sm:py-2 rounded-md">
-            <span className="font-bold text-yellow-400">{gameState.gold}</span> Gold
+            <span className="font-bold text-yellow-400">{gameState?.gold}</span> Gold
           </div>
-          <div className="bg-purple-700/50 px-3 py-1 sm:px-4 sm:py-2 rounded-md">Day {gameState.daysPassed}</div>
+          <div className="bg-purple-700/50 px-3 py-1 sm:px-4 sm:py-2 rounded-md">Day {gameState?.daysPassed}</div>
         </div>
-        <Button onClick={advanceDay} variant="outline" className="bg-purple-700 hover:bg-purple-600 w-full sm:w-auto">
+        <Button
+          onClick={advanceDay}
+          variant="outline"
+          className="bg-purple-700 hover:bg-purple-600 w-full sm:w-auto next-day-button"
+        >
           Next Day
         </Button>
       </div>
@@ -710,8 +736,8 @@ export default function PotionGame() {
 
         <TabsContent value="garden" className="bg-purple-800/30 p-4 rounded-lg">
           <Garden
-            garden={gameState.garden}
-            inventory={gameState.inventory}
+            garden={gameState?.garden}
+            inventory={gameState?.inventory}
             setGameState={setGameState}
             addToInventory={addToInventory}
             removeFromInventory={removeFromInventory}
@@ -720,7 +746,7 @@ export default function PotionGame() {
 
         <TabsContent value="crafting" className="bg-purple-800/30 p-4 rounded-lg">
           <PotionCrafting
-            inventory={gameState.inventory}
+            inventory={gameState?.inventory}
             addToInventory={addToInventory}
             removeFromInventory={removeFromInventory}
             toast={toast}
@@ -730,20 +756,20 @@ export default function PotionGame() {
 
         <TabsContent value="inventory" className="bg-purple-800/30 p-4 rounded-lg">
           <Inventory
-            inventory={gameState.inventory}
-            marketDemand={gameState.marketDemand}
+            inventory={gameState?.inventory}
+            marketDemand={gameState?.marketDemand}
             activatePotionEffect={activatePotionEffect}
           />
         </TabsContent>
 
         <TabsContent value="shop" className="bg-purple-800/30 p-4 rounded-lg">
           <Shop
-            gold={gameState.gold}
+            gold={gameState?.gold}
             updateGold={updateGold}
-            inventory={gameState.inventory}
+            inventory={gameState?.inventory}
             addToInventory={addToInventory}
-            marketDemand={gameState.marketDemand}
-            daysPassed={gameState.daysPassed}
+            marketDemand={gameState?.marketDemand}
+            daysPassed={gameState?.daysPassed}
             haggleActive={gameState?.activeEffects?.haggling > 0}
             rareIngredientActive={gameState?.activeEffects?.rareIngredientNextDay}
             getModifiedPrice={getModifiedPrice}
@@ -752,13 +778,13 @@ export default function PotionGame() {
 
         <TabsContent value="trading" className="bg-purple-800/30 p-4 rounded-lg">
           <Trading
-            npcs={gameState.npcs}
-            inventory={gameState.inventory}
-            gold={gameState.gold}
+            npcs={gameState?.npcs}
+            inventory={gameState?.inventory}
+            gold={gameState?.gold}
             updateGold={updateGold}
             removeFromInventory={removeFromInventory}
             addToInventory={addToInventory}
-            marketDemand={gameState.marketDemand}
+            marketDemand={gameState?.marketDemand}
             marketInsightActive={gameState?.activeEffects?.marketInsight > 0}
             haggleActive={gameState?.activeEffects?.haggling > 0}
             getModifiedPrice={getModifiedPrice}
@@ -768,5 +794,13 @@ export default function PotionGame() {
 
       <Toaster />
     </div>
+  )
+}
+
+export default function PotionGame() {
+  return (
+    <TutorialProvider>
+      <PotionGameContent />
+    </TutorialProvider>
   )
 }

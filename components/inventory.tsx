@@ -147,7 +147,7 @@ export default function Inventory({ inventory, marketDemand, activatePotionEffec
                       {inventory.ingredients.map((item) => (
                         <div
                           key={item.id}
-                          className={`p-2 rounded-md cursor-pointer flex justify-between items-center ${selectedItem?.id === item.id && selectedItem?.type === "ingredient" ? "bg-purple-700" : "hover:bg-purple-800/50"}`}
+                          className={`p-2 rounded-md cursor-pointer flex justify-between items-center inventory-item ${selectedItem?.id === item.id && selectedItem?.type === "ingredient" ? "bg-purple-700" : "hover:bg-purple-800/50"}`}
                           onClick={() => handleItemClick(item, "ingredient")}
                         >
                           <span>{item.name}</span>
@@ -174,7 +174,7 @@ export default function Inventory({ inventory, marketDemand, activatePotionEffec
                       {inventory.potions.map((item) => (
                         <div
                           key={item.id}
-                          className={`p-2 rounded-md cursor-pointer flex justify-between items-center ${selectedItem?.id === item.id && selectedItem?.type === "potion" ? "bg-purple-700" : "hover:bg-purple-800/50"}`}
+                          className={`p-2 rounded-md cursor-pointer flex justify-between items-center inventory-item ${selectedItem?.id === item.id && selectedItem?.type === "potion" ? "bg-purple-700" : "hover:bg-purple-800/50"}`}
                           onClick={() => handleItemClick(item, "potion")}
                         >
                           <span className="flex items-center">
@@ -208,7 +208,7 @@ export default function Inventory({ inventory, marketDemand, activatePotionEffec
                       {inventory.tools.map((item) => (
                         <div
                           key={item.id}
-                          className={`p-2 rounded-md cursor-pointer flex justify-between items-center ${selectedItem?.id === item.id && selectedItem?.type === "tool" ? "bg-purple-700" : "hover:bg-purple-800/50"}`}
+                          className={`p-2 rounded-md cursor-pointer flex justify-between items-center inventory-item ${selectedItem?.id === item.id && selectedItem?.type === "tool" ? "bg-purple-700" : "hover:bg-purple-800/50"}`}
                           onClick={() => handleItemClick(item, "tool")}
                         >
                           <span>{item.name}</span>

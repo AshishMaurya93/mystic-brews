@@ -332,7 +332,12 @@ export default function Trading({
 
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-purple-300">Your gold: {gold}</span>
-                      <Button variant="outline" onClick={() => setNpcDialogOpen(false)} size="sm">
+                      <Button
+                        variant="secondary"
+                        onClick={() => setNpcDialogOpen(false)}
+                        size="sm"
+                        className="bg-white text-purple-900 hover:bg-gray-200"
+                      >
                         Close
                       </Button>
                     </div>
@@ -390,7 +395,7 @@ export default function Trading({
                           setPotionDialogOpen(false)
                           setNpcDialogOpen(true)
                         }}
-                        className="w-full"
+                        className="w-full bg-white text-purple-900 hover:bg-gray-200"
                       >
                         Back to Trader
                       </Button>

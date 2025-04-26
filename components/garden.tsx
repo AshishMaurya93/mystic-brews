@@ -147,19 +147,18 @@ export default function Garden({ garden, inventory, setGameState, addToInventory
         </div>
       )
     } else if (plot) {
+      const isReady = plot.growthStage >= plot.ingredient.growthTime
       return (
-        <div className="h-full flex flex-col justify-between">
+        <div className={`h-full flex flex-col justify-between ${isReady ? "garden-plot-ready" : ""}`}>
           <div>
             <h3 className="font-semibold text-sm sm:text-base">{plot.ingredient.name}</h3>
             <p className="text-xs text-purple-300">
-              {plot.growthStage >= plot.ingredient.growthTime
-                ? "Ready to harvest!"
-                : `Growing: ${plot.growthStage}/${plot.ingredient.growthTime} days`}
+              {isReady ? "Ready to harvest!" : `Growing: ${plot.growthStage}/${plot.ingredient.growthTime} days`}
             </p>
             <Progress value={(plot.growthStage / plot.ingredient.growthTime) * 100} className="h-2 mt-2" />
           </div>
 
-          {plot.growthStage >= plot.ingredient.growthTime ? (
+          {isReady ? (
             <Button
               variant="secondary"
               size="sm"
@@ -175,7 +174,7 @@ export default function Garden({ garden, inventory, setGameState, addToInventory
       )
     } else {
       return (
-        <div className="h-full flex flex-col items-center justify-center py-3">
+        <div className="h-full flex flex-col items-center justify-center py-3 garden-plot-empty">
           <p className="text-purple-400 mb-2 text-sm sm:text-base">Empty Plot</p>
           <Button
             variant="outline"
@@ -280,9 +279,9 @@ export default function Garden({ garden, inventory, setGameState, addToInventory
       {isMobile && (
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogContent className="bg-purple-900 text-white border-purple-700 max-w-[90vw] sm:max-w-lg">
-            <DialogHeader>
-              {selectedPlotDetails && selectedPlotDetails.plot ? (
-                <>
+            {selectedPlotDetails && selectedPlotDetails.plot ? (
+              <>
+                <DialogHeader>
                   <DialogTitle>
                     {selectedPlotDetails.plot.ingredient.name} - Plot {selectedPlotDetails.index + 1}
                   </DialogTitle>
@@ -291,30 +290,36 @@ export default function Garden({ garden, inventory, setGameState, addToInventory
                       ? "Ready to harvest!"
                       : `Growing: ${selectedPlotDetails.plot.growthStage}/${selectedPlotDetails.plot.ingredient.growthTime} days`}
                   </DialogDescription>
-                </>
-              ) : selectedPlotDetails && selectedPlotDetails.index >= garden.unlocked ? (
-                <>
+                </DialogHeader>
+              </>
+            ) : selectedPlotDetails && selectedPlotDetails.index >= garden.unlocked ? (
+              <>
+                <DialogHeader>
                   <DialogTitle>Locked Plot {selectedPlotDetails.index + 1}</DialogTitle>
                   <DialogDescription className="text-purple-300">
                     This plot needs to be unlocked before you can plant here.
                   </DialogDescription>
-                </>
-              ) : selectedPlot !== null ? (
-                <>
+                </DialogHeader>
+              </>
+            ) : selectedPlot !== null ? (
+              <>
+                <DialogHeader>
                   <DialogTitle>Planting in Plot {selectedPlot + 1}</DialogTitle>
                   <DialogDescription className="text-purple-300">
                     Select a seed to plant in this plot.
                   </DialogDescription>
-                </>
-              ) : (
-                <>
+                </DialogHeader>
+              </>
+            ) : (
+              <>
+                <DialogHeader>
                   <DialogTitle>Empty Plot {selectedPlotDetails?.index + 1}</DialogTitle>
                   <DialogDescription className="text-purple-300">
                     Would you like to plant something here?
                   </DialogDescription>
-                </>
-              )}
-            </DialogHeader>
+                </DialogHeader>
+              </>
+            )}
 
             {selectedPlotDetails && selectedPlotDetails.plot ? (
               // Existing plant details

@@ -118,6 +118,7 @@ export default function Shop({
     return price
   }
 
+  // Update the buyItem function to ensure it's using the correct quantity
   const buyItem = () => {
     if (!selectedItem) return
 
@@ -142,6 +143,7 @@ export default function Shop({
     }
   }
 
+  // Update the sellItem function to ensure it's using the correct quantity
   const sellItem = () => {
     if (!selectedItem) return
 
@@ -327,7 +329,7 @@ export default function Shop({
                         {shopStock.ingredients.map((item) => (
                           <div
                             key={item.id}
-                            className={`p-2 rounded-md cursor-pointer flex justify-between items-center ${selectedItem?.id === item.id ? "bg-purple-700" : "hover:bg-purple-800/50"}`}
+                            className={`p-2 rounded-md cursor-pointer flex justify-between items-center shop-item ${selectedItem?.id === item.id ? "bg-purple-700" : "hover:bg-purple-800/50"}`}
                             onClick={() => handleItemClick(item)}
                           >
                             <span className="flex items-center">
@@ -357,7 +359,7 @@ export default function Shop({
                         {shopStock.tools.map((item) => (
                           <div
                             key={item.id}
-                            className={`p-2 rounded-md cursor-pointer flex justify-between items-center ${selectedItem?.id === item.id ? "bg-purple-700" : "hover:bg-purple-800/50"}`}
+                            className={`p-2 rounded-md cursor-pointer flex justify-between items-center shop-item ${selectedItem?.id === item.id ? "bg-purple-700" : "hover:bg-purple-800/50"}`}
                             onClick={() => handleItemClick(item)}
                           >
                             <span className="flex items-center">
@@ -413,7 +415,10 @@ export default function Shop({
                           type="number"
                           min="1"
                           value={buyQuantity}
-                          onChange={(e) => setBuyQuantity(Math.max(1, Number.parseInt(e.target.value) || 1))}
+                          onChange={(e) => {
+                            const value = Math.max(1, Number.parseInt(e.target.value) || 1)
+                            setBuyQuantity(value)
+                          }}
                           className="bg-purple-900 text-white border-purple-700"
                         />
                       </div>
@@ -483,7 +488,7 @@ export default function Shop({
                           {inventory.ingredients.map((item) => (
                             <div
                               key={item.id}
-                              className={`p-2 rounded-md cursor-pointer flex justify-between items-center ${selectedItem?.id === item.id && activeTab === "sell" ? "bg-purple-700" : "hover:bg-purple-800/50"}`}
+                              className={`p-2 rounded-md cursor-pointer flex justify-between items-center shop-item ${selectedItem?.id === item.id && activeTab === "sell" ? "bg-purple-700" : "hover:bg-purple-800/50"}`}
                               onClick={() => handleItemClick(item)}
                             >
                               <div className="flex justify-between w-full">
@@ -515,7 +520,7 @@ export default function Shop({
                           {inventory.potions.map((item) => (
                             <div
                               key={item.id}
-                              className={`p-2 rounded-md cursor-pointer flex justify-between items-center ${selectedItem?.id === item.id && activeTab === "sell" ? "bg-purple-700" : "hover:bg-purple-800/50"}`}
+                              className={`p-2 rounded-md cursor-pointer flex justify-between items-center shop-item ${selectedItem?.id === item.id && activeTab === "sell" ? "bg-purple-700" : "hover:bg-purple-800/50"}`}
                               onClick={() => handleItemClick(item)}
                             >
                               <div className="flex justify-between w-full">
@@ -547,7 +552,7 @@ export default function Shop({
                           {inventory.tools.map((item) => (
                             <div
                               key={item.id}
-                              className={`p-2 rounded-md cursor-pointer flex justify-between items-center ${selectedItem?.id === item.id && activeTab === "sell" ? "bg-purple-700" : "hover:bg-purple-800/50"}`}
+                              className={`p-2 rounded-md cursor-pointer flex justify-between items-center shop-item ${selectedItem?.id === item.id && activeTab === "sell" ? "bg-purple-700" : "hover:bg-purple-800/50"}`}
                               onClick={() => handleItemClick(item)}
                             >
                               <div className="flex justify-between w-full">
@@ -607,11 +612,13 @@ export default function Shop({
                           min="1"
                           max={selectedItem.quantity}
                           value={sellQuantity}
-                          onChange={(e) =>
-                            setSellQuantity(
-                              Math.min(selectedItem.quantity, Math.max(1, Number.parseInt(e.target.value) || 1)),
+                          onChange={(e) => {
+                            const value = Math.min(
+                              selectedItem.quantity,
+                              Math.max(1, Number.parseInt(e.target.value) || 1),
                             )
-                          }
+                            setSellQuantity(value)
+                          }}
                           className="bg-purple-900 text-white border-purple-700"
                         />
                       </div>

@@ -95,3 +95,22 @@
   @apply text-white focus:bg-purple-800 focus:text-white;
 }
 
+/* Tutorial highlight styles */
+.tutorial-highlight {
+  position: relative;
+  z-index: 60;
+  animation: pulse 2s infinite;
+  box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  }
+}

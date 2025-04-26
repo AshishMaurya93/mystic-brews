@@ -140,7 +140,7 @@ export default function PotionCrafting({
                 </TabsList>
 
                 <TabsContent value="all">
-                  <div className="space-y-2">
+                  <div className="space-y-2 recipe-list">
                     {potionRecipes.map((recipe) => {
                       const potion = initialPotions.find((p) => p.id === recipe.potionId)
                       const canCraft = canCraftPotion(recipe)
@@ -171,7 +171,7 @@ export default function PotionCrafting({
                 </TabsContent>
 
                 <TabsContent value="available">
-                  <div className="space-y-2">
+                  <div className="space-y-2 recipe-list">
                     {potionRecipes
                       .filter((recipe) => canCraftPotion(recipe))
                       .map((recipe) => {
@@ -192,7 +192,7 @@ export default function PotionCrafting({
                 </TabsContent>
 
                 <TabsContent value="unavailable">
-                  <div className="space-y-2">
+                  <div className="space-y-2 recipe-list">
                     {potionRecipes
                       .filter((recipe) => !canCraftPotion(recipe))
                       .map((recipe) => {
@@ -259,7 +259,11 @@ export default function PotionCrafting({
                   </p>
                 </div>
 
-                <Button className="w-full" disabled={!canCraftPotion(selectedRecipe)} onClick={craftPotion}>
+                <Button
+                  className="w-full craft-button"
+                  disabled={!canCraftPotion(selectedRecipe)}
+                  onClick={craftPotion}
+                >
                   Craft Potion
                 </Button>
               </CardContent>
@@ -320,7 +324,11 @@ export default function PotionCrafting({
                   </div>
 
                   <DialogFooter>
-                    <Button className="w-full" disabled={!canCraftPotion(selectedRecipe)} onClick={craftPotion}>
+                    <Button
+                      className="w-full craft-button"
+                      disabled={!canCraftPotion(selectedRecipe)}
+                      onClick={craftPotion}
+                    >
                       Craft Potion
                     </Button>
                   </DialogFooter>
