@@ -260,7 +260,7 @@ function PotionGameContent() {
       }
 
       // Notify when effects expire
-      Object.entries(prev.activeEffects).forEach(([effect, value]) => {
+      Object.entries(prev?.activeEffects || {}).forEach(([effect, value]) => {
         if (value === 1 && typeof value === "number") {
           // Will expire this day
           const effectName = effect
