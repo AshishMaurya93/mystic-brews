@@ -147,7 +147,7 @@ function PotionGameContent() {
     }))
 
     // Initialize market demand
-    const demand = {}
+    const demand: Record<string, number> = {}
     initialPotions.forEach((potion) => {
       demand[potion.id] = Math.random() * 0.5 + 0.75 // Random demand between 0.75 and 1.25
     })
