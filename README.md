@@ -1,6 +1,6 @@
 # Mystic Brews: Potion-Making Simulation Game
 
-![Mystic Brews](https://raw.githubusercontent.com/AshishMaurya93/mystic-brews/main/public/Mystic%20brew%20icon.jpg)
+![Mystic Brews](https://raw.githubusercontent.com/AshishMaurya93/mystic-brews/main/public/Mystic%20brew.jpg)
 
 ## Overview
 
