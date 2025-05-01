@@ -1,6 +1,6 @@
 # Mystic Brews: Potion-Making Simulation Game
 
-![Mystic Brews Icon](https://raw.githubusercontent.com/AshishMaurya93/mystic-brews/main/public/Mystic%20brew.jpg)
+![Mystic Brews](https://placeholder.svg?height=200&width=600&text=Mystic+Brews)
 
 ## Overview
 
@@ -54,6 +54,5 @@ Mystic Brews is an immersive potion-making simulation game where players can cul
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/AshishMaurya93/potion-game.git
+git clone https://github.com/yourusername/mystic-brews.git
 cd mystic-brews
-

@@ -26,15 +26,27 @@ export function TutorialOverlay() {
         setHighlight('[data-value="garden"]')
         break
       case "garden-plant":
-        setPosition({ top: "200px", left: isMobile ? "50%" : "30%", transform: isMobile ? "translateX(-50%)" : "none" })
+        setPosition({
+          top: isMobile ? "250px" : "200px",
+          left: isMobile ? "50%" : "30%",
+          transform: isMobile ? "translateX(-50%)" : "none",
+        })
         setHighlight(".garden-plot-empty")
         break
       case "garden-wait":
-        setPosition({ top: "120px", left: "85%", transform: "translateX(-50%)" })
+        setPosition({
+          top: "120px",
+          left: isMobile ? "75%" : "85%",
+          transform: "translateX(-50%)",
+        })
         setHighlight(".next-day-button")
         break
       case "garden-harvest":
-        setPosition({ top: "200px", left: isMobile ? "50%" : "30%", transform: isMobile ? "translateX(-50%)" : "none" })
+        setPosition({
+          top: isMobile ? "250px" : "200px",
+          left: isMobile ? "50%" : "30%",
+          transform: isMobile ? "translateX(-50%)" : "none",
+        })
         setHighlight(".garden-plot-ready")
         break
       case "crafting-intro":
@@ -42,11 +54,19 @@ export function TutorialOverlay() {
         setHighlight('[data-value="crafting"]')
         break
       case "crafting-select":
-        setPosition({ top: "200px", left: isMobile ? "50%" : "30%", transform: isMobile ? "translateX(-50%)" : "none" })
+        setPosition({
+          top: isMobile ? "250px" : "200px",
+          left: isMobile ? "50%" : "30%",
+          transform: isMobile ? "translateX(-50%)" : "none",
+        })
         setHighlight(".recipe-list")
         break
       case "crafting-create":
-        setPosition({ top: "300px", left: isMobile ? "50%" : "70%", transform: isMobile ? "translateX(-50%)" : "none" })
+        setPosition({
+          top: isMobile ? "350px" : "300px",
+          left: isMobile ? "50%" : "70%",
+          transform: isMobile ? "translateX(-50%)" : "none",
+        })
         setHighlight(".craft-button")
         break
       case "inventory-intro":
@@ -54,7 +74,11 @@ export function TutorialOverlay() {
         setHighlight('[data-value="inventory"]')
         break
       case "inventory-view":
-        setPosition({ top: "200px", left: isMobile ? "50%" : "30%", transform: isMobile ? "translateX(-50%)" : "none" })
+        setPosition({
+          top: isMobile ? "250px" : "200px",
+          left: isMobile ? "50%" : "30%",
+          transform: isMobile ? "translateX(-50%)" : "none",
+        })
         setHighlight(".inventory-item")
         break
       case "shop-intro":
@@ -62,12 +86,20 @@ export function TutorialOverlay() {
         setHighlight('[data-value="shop"]')
         break
       case "shop-buy":
-        setPosition({ top: "200px", left: isMobile ? "50%" : "30%", transform: isMobile ? "translateX(-50%)" : "none" })
+        setPosition({
+          top: isMobile ? "250px" : "200px",
+          left: isMobile ? "50%" : "30%",
+          transform: isMobile ? "translateX(-50%)" : "none",
+        })
         setHighlight(".shop-item")
         break
       case "trading-intro":
         setPosition({ top: "120px", left: "50%", transform: "translateX(-50%)" })
         setHighlight('[data-value="trading"]')
+        break
+      case "daily-tasks-intro":
+        setPosition({ top: "120px", left: "50%", transform: "translateX(-50%)" })
+        setHighlight('[data-value="tasks"]')
         break
       case "complete":
         setPosition({ top: "50%", left: "50%", transform: "translate(-50%, -50%)" })
@@ -124,6 +156,7 @@ export function TutorialOverlay() {
             <h3 className="text-lg font-bold mb-2">The Garden</h3>
             <p className="mb-4">
               Your garden is where you'll grow magical ingredients. You start with 4 plots, and can unlock more later.
+              Click on the Garden tab to begin.
             </p>
             <Button onClick={nextStep} className="w-full">
               Next
@@ -138,7 +171,7 @@ export function TutorialOverlay() {
               Click on an empty plot to plant a seed. You already have some starter ingredients in your inventory.
             </p>
             <p className="text-sm text-purple-300 mb-4">
-              <strong>Task:</strong> Plant a seed in an empty plot.
+              <strong>Task:</strong> Click on an empty plot, then select a seed to plant.
             </p>
             <Button onClick={nextStep} className="w-full">
               I've Planted a Seed
@@ -150,7 +183,8 @@ export function TutorialOverlay() {
           <>
             <h3 className="text-lg font-bold mb-2">Growing Ingredients</h3>
             <p className="mb-4">
-              Plants need time to grow. Click the "Next Day" button to advance time and grow your plants.
+              Plants need time to grow. Click the "Next Day" button in the top right to advance time and grow your
+              plants.
             </p>
             <p className="text-sm text-purple-300 mb-4">
               <strong>Task:</strong> Click "Next Day" a few times until your plant is fully grown.
@@ -169,7 +203,7 @@ export function TutorialOverlay() {
               ingredients.
             </p>
             <p className="text-sm text-purple-300 mb-4">
-              <strong>Task:</strong> Harvest your fully grown plant.
+              <strong>Task:</strong> Click on your fully grown plant and harvest it.
             </p>
             <Button onClick={nextStep} className="w-full">
               I've Harvested My Plant
@@ -291,6 +325,22 @@ export function TutorialOverlay() {
             </Button>
           </>
         )
+      case "daily-tasks-intro":
+        return (
+          <>
+            <h3 className="text-lg font-bold mb-2">Daily Tasks</h3>
+            <p className="mb-4">
+              The Tasks tab shows special daily challenges that reward you with extra gold. Complete these tasks to earn
+              bonuses!
+            </p>
+            <p className="text-sm text-purple-300 mb-4">
+              Tasks refresh each day, so check back regularly for new challenges.
+            </p>
+            <Button onClick={nextStep} className="w-full">
+              Next
+            </Button>
+          </>
+        )
       case "complete":
         return (
           <>
@@ -300,7 +350,7 @@ export function TutorialOverlay() {
               building your magical business!
             </p>
             <p className="text-sm text-purple-300 mb-4">
-              Remember, you can access the help menu anytime by clicking the "?" icon in the top right corner.
+              Remember, you can access the settings menu anytime by clicking the gear icon in the top right corner.
             </p>
             <Button onClick={nextStep} className="w-full">
               Start Playing
@@ -325,6 +375,7 @@ export function TutorialOverlay() {
           left: position.left,
           transform: position.transform,
           width: isMobile ? "90%" : "400px",
+          zIndex: 60,
         }}
       >
         <Button

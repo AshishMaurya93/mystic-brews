@@ -126,21 +126,21 @@ export default function PotionCrafting({
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
         <div className="md:col-span-1">
-          <Card>
+          <Card className="h-[500px] flex flex-col">
             <CardHeader>
               <CardTitle>Recipes</CardTitle>
               <CardDescription>Select a recipe to craft</CardDescription>
             </CardHeader>
-            <CardContent>
-              <Tabs defaultValue="all" className="w-full">
+            <CardContent className="flex-1 overflow-hidden">
+              <Tabs defaultValue="all" className="w-full h-full flex flex-col">
                 <TabsList className="grid grid-cols-3 mb-4 overflow-x-auto no-scrollbar">
                   <TabsTrigger value="all">All</TabsTrigger>
                   <TabsTrigger value="available">Available</TabsTrigger>
                   <TabsTrigger value="unavailable">Unavailable</TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="all">
-                  <div className="space-y-2 recipe-list">
+                <TabsContent value="all" className="flex-1 overflow-hidden">
+                  <div className="space-y-2 recipe-list h-[350px] overflow-y-auto pr-1">
                     {potionRecipes.map((recipe) => {
                       const potion = initialPotions.find((p) => p.id === recipe.potionId)
                       const canCraft = canCraftPotion(recipe)
@@ -170,8 +170,8 @@ export default function PotionCrafting({
                   </div>
                 </TabsContent>
 
-                <TabsContent value="available">
-                  <div className="space-y-2 recipe-list">
+                <TabsContent value="available" className="flex-1 overflow-hidden">
+                  <div className="space-y-2 recipe-list h-[350px] overflow-y-auto pr-1">
                     {potionRecipes
                       .filter((recipe) => canCraftPotion(recipe))
                       .map((recipe) => {
@@ -191,8 +191,8 @@ export default function PotionCrafting({
                   </div>
                 </TabsContent>
 
-                <TabsContent value="unavailable">
-                  <div className="space-y-2 recipe-list">
+                <TabsContent value="unavailable" className="flex-1 overflow-hidden">
+                  <div className="space-y-2 recipe-list h-[350px] overflow-y-auto pr-1">
                     {potionRecipes
                       .filter((recipe) => !canCraftPotion(recipe))
                       .map((recipe) => {

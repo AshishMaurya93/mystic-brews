@@ -17,6 +17,7 @@ type TutorialStep =
   | "shop-intro"
   | "shop-buy"
   | "trading-intro"
+  | "daily-tasks-intro"
   | "complete"
   | null
 
@@ -98,6 +99,9 @@ export function TutorialProvider({ children }: { children: React.ReactNode }) {
         setCurrentStep("trading-intro")
         break
       case "trading-intro":
+        setCurrentStep("daily-tasks-intro")
+        break
+      case "daily-tasks-intro":
         setCurrentStep("complete")
         break
       case "complete":

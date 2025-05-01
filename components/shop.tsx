@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import type { Inventory } from "@/lib/types"
 import { initialIngredients, initialTools, potionRecipes } from "@/lib/game-data"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, Plus, Minus } from "lucide-react"
 import { useMobile } from "@/hooks/use-mobile"
 
 interface ShopProps {
@@ -44,6 +44,12 @@ export default function Shop({
   const tabsListRef = useRef<HTMLDivElement>(null)
   const subTabsListRef = useRef<HTMLDivElement>(null)
   const isMobile = useMobile()
+
+  // Reset quantities when selected item changes
+  useEffect(() => {
+    setBuyQuantity(1)
+    setSellQuantity(1)
+  }, [selectedItem])
 
   // Get all required ingredients from recipes
   const getAllRequiredIngredients = () => {
@@ -116,6 +122,25 @@ export default function Shop({
     }
 
     return price
+  }
+
+  // Increment quantity
+  const incrementQuantity = (isBuying = true) => {
+    if (isBuying) {
+      setBuyQuantity((prev) => prev + 1)
+    } else {
+      const maxSell = selectedItem ? selectedItem.quantity : 1
+      setSellQuantity((prev) => Math.min(prev + 1, maxSell))
+    }
+  }
+
+  // Decrement quantity
+  const decrementQuantity = (isBuying = true) => {
+    if (isBuying) {
+      setBuyQuantity((prev) => Math.max(prev - 1, 1))
+    } else {
+      setSellQuantity((prev) => Math.max(prev - 1, 1))
+    }
   }
 
   // Update the buyItem function to ensure it's using the correct quantity
@@ -410,7 +435,16 @@ export default function Shop({
                     </div>
 
                     <div className="mt-4 flex flex-col sm:flex-row items-center gap-3">
-                      <div className="w-full sm:w-24">
+                      <div className="w-full sm:w-auto flex items-center">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => decrementQuantity(true)}
+                          disabled={buyQuantity <= 1}
+                          className="h-8 w-8"
+                        >
+                          <Minus className="h-4 w-4" />
+                        </Button>
                         <Input
                           type="number"
                           min="1"
@@ -419,8 +453,16 @@ export default function Shop({
                             const value = Math.max(1, Number.parseInt(e.target.value) || 1)
                             setBuyQuantity(value)
                           }}
-                          className="bg-purple-900 text-white border-purple-700"
+                          className="bg-purple-900 text-white border-purple-700 w-16 mx-2 text-center"
                         />
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => incrementQuantity(true)}
+                          className="h-8 w-8"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
                       </div>
                       <Button
                         onClick={buyItem}
@@ -606,7 +648,16 @@ export default function Shop({
                     </div>
 
                     <div className="mt-4 flex flex-col sm:flex-row items-center gap-3">
-                      <div className="w-full sm:w-24">
+                      <div className="w-full sm:w-auto flex items-center">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => decrementQuantity(false)}
+                          disabled={sellQuantity <= 1}
+                          className="h-8 w-8"
+                        >
+                          <Minus className="h-4 w-4" />
+                        </Button>
                         <Input
                           type="number"
                           min="1"
@@ -619,8 +670,17 @@ export default function Shop({
                             )
                             setSellQuantity(value)
                           }}
-                          className="bg-purple-900 text-white border-purple-700"
+                          className="bg-purple-900 text-white border-purple-700 w-16 mx-2 text-center"
                         />
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => incrementQuantity(false)}
+                          disabled={sellQuantity >= selectedItem.quantity}
+                          className="h-8 w-8"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
                       </div>
                       <Button
                         onClick={sellItem}
@@ -645,7 +705,7 @@ export default function Shop({
       {/* Mobile Dialog for Item Details */}
       {isMobile && (
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogContent className="bg-purple-900 text-white border-purple-700 max-w-[90vw] sm:max-w-lg">
+          <DialogContent className="bg-purple-900 text-white border-purple-700 max-w-[90vw] sm:max-w-lg z-50">
             {selectedItem && (
               <>
                 <DialogHeader>
@@ -683,8 +743,17 @@ export default function Shop({
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3">
-                    <div className="w-24">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => decrementQuantity(activeTab === "buy")}
+                        disabled={activeTab === "buy" ? buyQuantity <= 1 : sellQuantity <= 1}
+                        className="h-8 w-8"
+                      >
+                        <Minus className="h-4 w-4" />
+                      </Button>
                       <Input
                         type="number"
                         min="1"
@@ -698,19 +767,32 @@ export default function Shop({
                             setSellQuantity(Math.min(selectedItem.quantity, value))
                           }
                         }}
-                        className="bg-purple-800 text-white border-purple-600"
+                        className="bg-purple-800 text-white border-purple-600 w-16 mx-2 text-center"
                       />
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => incrementQuantity(activeTab === "buy")}
+                        disabled={activeTab === "sell" && sellQuantity >= selectedItem.quantity}
+                        className="h-8 w-8"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
                     </div>
                     {activeTab === "buy" ? (
                       <Button
                         onClick={buyItem}
                         disabled={gold < getMarketValue(selectedItem) * buyQuantity}
-                        className="flex-1"
+                        className="flex-1 ml-4"
                       >
                         Buy for {getMarketValue(selectedItem) * buyQuantity} gold
                       </Button>
                     ) : (
-                      <Button onClick={sellItem} disabled={sellQuantity > selectedItem.quantity} className="flex-1">
+                      <Button
+                        onClick={sellItem}
+                        disabled={sellQuantity > selectedItem.quantity}
+                        className="flex-1 ml-4"
+                      >
                         Sell for {getMarketValue(selectedItem, false) * sellQuantity} gold
                       </Button>
                     )}

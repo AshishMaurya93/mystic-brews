@@ -10,6 +10,8 @@ import Garden from "@/components/garden"
 import PotionCrafting from "@/components/potion-crafting"
 import Shop from "@/components/shop"
 import Trading from "@/components/trading"
+import DailyTasks, { type Task } from "@/components/daily-tasks"
+import { SettingsMenu } from "@/components/settings-menu"
 import type { GameState, Ingredient, Potion, Tool } from "@/lib/types"
 import { initialIngredients, initialPotions, initialTools, initialNpcs } from "@/lib/game-data"
 import { ChevronLeft, ChevronRight, BookOpen } from "lucide-react"
@@ -24,7 +26,7 @@ function TutorialButton() {
     <Button
       variant="ghost"
       size="icon"
-      className="absolute top-4 right-16 sm:top-6 sm:right-20 bg-purple-800/50 hover:bg-purple-700/50 text-white rounded-full"
+      className="absolute top-4 right-20 sm:top-6 sm:right-20 bg-purple-800/50 hover:bg-purple-700/50 text-white rounded-full z-20"
       onClick={resetTutorial}
       aria-label="Restart Tutorial"
     >
@@ -62,9 +64,12 @@ function PotionGameContent() {
       rareTraderNextDay: false,
     },
   })
+  const [completedTasks, setCompletedTasks] = useState<Task[]>([])
+  const [taskProgress, setTaskProgress] = useState<Record<string, number>>({})
 
   const [activeTab, setActiveTab] = useState("garden")
   const tabsListRef = useRef<HTMLDivElement>(null)
+  const { resetTutorial } = useTutorial()
 
   // Scroll to active tab when it changes
   useEffect(() => {
@@ -111,7 +116,14 @@ function PotionGameContent() {
     const savedGame = localStorage.getItem("potionGameSave")
     if (savedGame) {
       try {
-        setGameState(JSON.parse(savedGame))
+        const parsedGame = JSON.parse(savedGame)
+        setGameState(parsedGame)
+
+        // Load completed tasks if they exist
+        if (localStorage.getItem("completedTasks")) {
+          setCompletedTasks(JSON.parse(localStorage.getItem("completedTasks") || "[]"))
+        }
+
         toast({
           title: "Game Loaded",
           description: "Your saved game has been loaded successfully!",
@@ -130,8 +142,9 @@ function PotionGameContent() {
     if (gameState?.daysPassed > 0) {
       // Don't save initial state
       localStorage.setItem("potionGameSave", JSON.stringify(gameState))
+      localStorage.setItem("completedTasks", JSON.stringify(completedTasks))
     }
-  }, [gameState])
+  }, [gameState, completedTasks])
 
   const initializeNewGame = () => {
     // Give player some starter ingredients
@@ -185,6 +198,9 @@ function PotionGameContent() {
         rareTraderNextDay: false,
       },
     })
+
+    // Reset completed tasks
+    setCompletedTasks([])
 
     toast({
       title: "New Game Started",
@@ -260,7 +276,7 @@ function PotionGameContent() {
       }
 
       // Notify when effects expire
-      Object.entries(prev?.activeEffects || {}).forEach(([effect, value]) => {
+      Object.entries(prev.activeEffects).forEach(([effect, value]) => {
         if (value === 1 && typeof value === "number") {
           // Will expire this day
           const effectName = effect
@@ -282,6 +298,9 @@ function PotionGameContent() {
         })
       }
 
+      // Reset daily tasks progress
+      setTaskProgress({})
+
       return {
         ...prev,
         garden: {
@@ -297,6 +316,10 @@ function PotionGameContent() {
         activeEffects: updatedEffects,
       }
     })
+
+    // Filter out tasks from the previous day
+    const currentDayTasks = completedTasks.filter((task) => task.id.startsWith(`task_${gameState.daysPassed + 1}_`))
+    setCompletedTasks(currentDayTasks)
 
     toast({
       title: "Day Advanced",
@@ -330,6 +353,9 @@ function PotionGameContent() {
         } else {
           newState.inventory.ingredients.push({ ...item, quantity })
         }
+
+        // Update task progress for harvesting
+        updateTaskProgress("harvest", 1)
       } else if ("effect" in item) {
         // It's a potion
         const existingItem = newState.inventory.potions.find((i) => i.id === item.id)
@@ -349,6 +375,9 @@ function PotionGameContent() {
         } else {
           newState.inventory.potions.push({ ...enhancedItem, quantity: enhancedItem.quantity || 1 })
         }
+
+        // Update task progress for crafting
+        updateTaskProgress("craft", 1)
       } else {
         // It's a tool
         const existingItem = newState.inventory.tools.find((i) => i.id === item.id)
@@ -392,12 +421,63 @@ function PotionGameContent() {
         title: "Gold Received",
         description: `+${amount} gold added to your purse.`,
       })
+
+      // Update task progress for selling
+      if (amount > 0) {
+        updateTaskProgress("sell", amount)
+      }
     } else {
       toast({
         title: "Gold Spent",
         description: `${amount} gold spent.`,
       })
+
+      // Update task progress for buying
+      if (amount < 0) {
+        updateTaskProgress("buy", 1)
+      }
     }
+  }
+
+  // Function to update task progress
+  const updateTaskProgress = (taskType: string, amount: number) => {
+    setTaskProgress((prev) => {
+      const newProgress = { ...prev }
+
+      // Find tasks of this type
+      completedTasks.forEach((task) => {
+        if (task.type === taskType && !task.completed) {
+          const currentProgress = newProgress[task.id] || task.progress
+          const newValue = currentProgress + amount
+          newProgress[task.id] = newValue
+
+          // Check if task is now completed
+          if (newValue >= task.target) {
+            // Update the completed tasks
+            const updatedTasks = completedTasks.map((t) =>
+              t.id === task.id ? { ...t, progress: newValue, completed: true } : t,
+            )
+            setCompletedTasks(updatedTasks)
+
+            toast({
+              title: "Task Completed!",
+              description: `You've completed the "${task.title}" task. Claim your reward!`,
+            })
+          } else {
+            // Just update progress
+            const updatedTasks = completedTasks.map((t) => (t.id === task.id ? { ...t, progress: newValue } : t))
+            setCompletedTasks(updatedTasks)
+          }
+        }
+      })
+
+      return newProgress
+    })
+  }
+
+  // Function to update completed tasks
+  const updateCompletedTasks = (tasks: Task[]) => {
+    setCompletedTasks(tasks)
   }
 
   // Function to activate potion effects
@@ -648,9 +728,21 @@ function PotionGameContent() {
     return effects
   }
 
+  // Reset game function for settings menu
+  const resetGame = () => {
+    localStorage.removeItem("potionGameSave")
+    localStorage.removeItem("completedTasks")
+    initializeNewGame()
+  }
+
   return (
     <div className="container mx-auto px-2 sm:px-4 py-4 max-w-6xl relative">
-      <TutorialButton />
+      {/* Header area with fixed height to prevent content shift */}
+      <div className="h-16 sm:h-20 relative mb-4">
+        <SettingsMenu resetGame={resetGame} resetTutorial={resetTutorial} />
+        <TutorialButton />
+      </div>
+
       <TutorialOverlay />
 
       <header className="mb-4 sm:mb-6 text-center">
@@ -713,7 +805,7 @@ function PotionGameContent() {
           {/* Horizontally scrollable tabs for mobile */}
           <TabsList
             ref={tabsListRef}
-            className="sm:grid sm:grid-cols-5 mb-4 w-full overflow-x-auto flex no-scrollbar"
+            className="sm:grid sm:grid-cols-6 mb-4 w-full overflow-x-auto flex no-scrollbar"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             <TabsTrigger value="garden" className="text-sm sm:text-base whitespace-nowrap">
@@ -730,6 +822,9 @@ function PotionGameContent() {
             </TabsTrigger>
             <TabsTrigger value="trading" className="text-sm sm:text-base whitespace-nowrap">
               Trading
+            </TabsTrigger>
+            <TabsTrigger value="tasks" className="text-sm sm:text-base whitespace-nowrap">
+              Tasks
             </TabsTrigger>
           </TabsList>
         </div>
@@ -788,6 +883,16 @@ function PotionGameContent() {
             marketInsightActive={gameState?.activeEffects?.marketInsight > 0}
             haggleActive={gameState?.activeEffects?.haggling > 0}
             getModifiedPrice={getModifiedPrice}
+          />
+        </TabsContent>
+
+        <TabsContent value="tasks" className="bg-purple-800/30 p-4 rounded-lg">
+          <DailyTasks
+            daysPassed={gameState?.daysPassed}
+            updateGold={updateGold}
+            completedTasks={completedTasks}
+            updateCompletedTasks={updateCompletedTasks}
+            onTaskProgressUpdate={updateTaskProgress}
           />
         </TabsContent>
       </Tabs>
