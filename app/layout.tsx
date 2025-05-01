@@ -10,6 +10,7 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "Mystic Brews - Potion Making Game",
   description: "A magical potion crafting simulation game",
+  keywords: 'Potion, Game, Mystic, Brews',
   icons: {
     icon: "/favicon.ico",
   },
