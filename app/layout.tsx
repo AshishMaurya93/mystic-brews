@@ -12,8 +12,10 @@ export const metadata: Metadata = {
   description: "A magical potion crafting simulation game",
   keywords: 'Potion, Game, Mystic, Brews',
   icons: {
-    icon: "/favicon.ico",
-  },
+    icon: {
+      url: '/favicon.ico', 
+    },
+  }
 }
 
 export default function RootLayout({
